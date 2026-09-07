@@ -1,0 +1,18 @@
+$kind: http-request
+order: 1000
+url: "{{base_url}}/api/v1/webhooks/bank-feed"
+method: POST
+headers:
+  Authorization: Bearer {{api_token}}
+  Content-Type: application/json
+  X-Bank-Signature: sha256_mock_hash_xyz789
+body:
+  type: json
+  content: |
+    {
+      "event_type": "transaction.received",
+      "bank_transaction_id": "tx_inst_cl_778899",
+      "amount_received": 1250.00,
+      "raw_bank_description": "EFT INTERBANK OVERNIGHT /FRM: J SMITH /REF: INV-2026-9999",
+      "clearing_rail": "INSTANT_PAYMENT"
+    }

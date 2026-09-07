@@ -1,0 +1,8 @@
+name: Waterfall API - Local Dev
+values:
+  - key: base_url
+    value: 'http://127.0.0.1:8000'
+  - key: api_token
+    value: wtf_mock_dev_token_123
+  - key: webhook_security_hash
+    value: sha256_mock_hash_xyz789
