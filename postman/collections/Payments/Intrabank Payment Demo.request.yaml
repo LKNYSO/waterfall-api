@@ -1,0 +1,20 @@
+$kind: http-request
+description: ""
+url: "{{base_url}}/api/v1/payments/verify"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"invoice_id\": \"INV-2026-8894-2\",\r
+
+    \  \"customer_id\": \"d3b07384-d113-4a11-a531-112233445566\",\r
+
+    \  \"amount\": 1250.00,\r
+
+    \  \"currency\": \"ZAR\",\r
+
+    \  \"expected_reference\": \"INV-2026-8894-2\"\r
+
+    }"
+order: 4502854090248229

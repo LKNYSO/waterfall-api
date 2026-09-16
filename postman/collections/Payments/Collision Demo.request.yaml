@@ -1,0 +1,20 @@
+$kind: http-request
+description: ""
+url: "{{base_url}}/api/v1/payments/verify"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"invoice_id\": \"INV-COLLIDE-BRAVO\",\r
+
+    \  \"customer_id\": \"d3b07384-d113-4a11-a001-112233445566\",\r
+
+    \  \"amount\": 5000.00,\r
+
+    \  \"currency\": \"ZAR\",\r
+
+    \  \"expected_reference\": \"MUNI-BLANK\" \r
+
+    }"
+order: 4502664545285923

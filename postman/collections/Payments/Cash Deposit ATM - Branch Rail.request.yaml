@@ -1,0 +1,21 @@
+$kind: http-request
+name: Cash Deposit ATM / Branch Rail
+description: ""
+url: "{{base_url}}/api/v1/webhooks/bank-feed"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"event_type\": \"transaction.received\",\r
+
+    \  \"bank_transaction_id\": \"tx_atm_dep_112233\",\r
+
+    \  \"amount_received\": 12500000.00,\r
+
+    \  \"raw_bank_description\": \"ATM CASH DEP /SITE: AT00948_DBN /REF: INV-2026-8894\",\r
+
+    \  \"clearing_rail\": \"CASH_DEPOSIT\"\r
+
+    }\r\n"
+order: 4501192425128934

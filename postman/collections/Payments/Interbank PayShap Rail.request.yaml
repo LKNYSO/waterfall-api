@@ -1,0 +1,22 @@
+$kind: http-request
+description: ""
+url: "{{base_url}}/api/v1/webhooks/bank-feed"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"event_type\": \"transaction.received\",\r
+
+    \  \"bank_transaction_id\": \"tx_shap_77665544x\",\r
+
+    \  \"amount_received\": 12500000.00,\r
+
+    \  \"raw_bank_description\": \"SHAP_PAYMENT /FROM: 0821112222@SHAP /MSG: INV-2026-8894\",\r
+
+    \  \"clearing_rail\": \"PAYSHAP\"\r
+
+    }\r
+
+    \r\n"
+order: 4202868123267162

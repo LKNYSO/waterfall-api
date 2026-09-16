@@ -6,3 +6,6 @@ variables:
   - key: json_web_token_19tv
     secret: true
     disabled: false
+  - key: supabase_service_role_api_key_08jz
+    secret: true
+    disabled: false

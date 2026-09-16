@@ -1,0 +1,20 @@
+$kind: http-request
+description: ""
+url: "{{base_url}}/api/v1/webhooks/bank-feed"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"event_type\": \"transaction.received\",\r
+
+    \  \"bank_transaction_id\": \"tx_fnb_internal_443322\",\r
+
+    \  \"amount_received\": 12500000.00,\r
+
+    \  \"raw_bank_description\": \"FNB INTERNAL TRANSFER /FRM: N NENE /REF: INV-2026-8894\",\r
+
+    \  \"clearing_rail\": \"INTRA_BANK\"\r
+
+    }\r\n"
+order: 4484895750994321

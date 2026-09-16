@@ -1,3 +1,4 @@
+from fastapi.responses import HTMLResponse  # --- 1. Add this import to the top row header of main.py ---
 from webhook_worker import dispatch_webhook_with_backoff # Import your new worker framework
 import hashlib
 import uuid
@@ -272,8 +273,33 @@ async def process_bank_webhook(payload: BankFeedWebhook, background_tasks: Backg
             expected_ref_upper = rec["expected_reference"].upper()
             truncated_ref_upper = expected_ref_upper[:8]
 
+            # Primary validation: verify string inclusion gate matches
             if expected_ref_upper in raw_desc_upper or truncated_ref_upper in raw_desc_upper:
                 matched_records.append(rec)
+
+        # 🚀 EXTRA COLLISION PROTOCOL LAYER: Best Fit Length Priority Check
+        if len(matched_records) > 1:
+            print(f"⚠️ [COLLISION PROTOCOL] Multi-match candidates detected ({len(matched_records)}). Evaluating Best Fit priority layer...")
+            
+            # Group records by whether their exact reference appears in the description
+            # and sort them by the length of the expected reference in descending order
+            exact_substring_matches = []
+            for rec in matched_records:
+                if rec["expected_reference"].upper() in raw_desc_upper:
+                    exact_substring_matches.append(rec)
+            
+            if exact_substring_matches:
+                # Sort descending by string character size length
+                exact_substring_matches.sort(key=lambda x: len(x["expected_reference"]), reverse=True)
+                
+                longest_match_len = len(exact_substring_matches[0]["expected_reference"])
+                # Filter down to only those items sharing the maximum length alignment value
+                top_tier_fits = [r for r in exact_substring_matches if len(r["expected_reference"]) == longest_match_len]
+                
+                # If a single candidate fits better than the shorter substrings, override and resolve the collision!
+                if len(top_tier_fits) == 1:
+                    print(f"🎯 [COLLISION PROTOCOL] Resolution secured! '{top_tier_fits[0]['invoice_id']}' selected via Longest String Match rule.")
+                    matched_records = top_tier_fits
 
         if len(matched_records) > 1:
             collision_ids = [rec["id"] for rec in matched_records]
@@ -333,10 +359,98 @@ async def process_bank_webhook(payload: BankFeedWebhook, background_tasks: Backg
             print(f"⚡ [ASYNC TASK] Database tracking rows locked to COMPLETED. Handing off outbound event worker hook.")
 
         return {"match_status": "IGNORED", "reason": "Amount matches open records, but text reference signatures do not align"}
-
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=500, detail=f"Engine runtime error: {str(e)}")
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.get("/dashboard/triage", response_class=HTMLResponse)
+async def serve_merchant_triage_dashboard_gui():
+    """
+    Renders the human-in-the-loop Manual Triage graphical desk interface framework.
+    Provides complete administrative control to clear matching ambiguities.
+    """
+    try:
+        with open("triage_dashboard.html", "r", encoding="utf-8") as f:
+            html_content = f.read()
+        return HTMLResponse(content=html_content, status_code=200)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed loading GUI template: {str(e)}")
+
+
+@app.get("/api/v1/internal/triage/queue")
+async def get_isolated_triage_records():
+    """
+    Dashboard Data Supplier: Fetches outstanding payments stuck in AWAITING_VERIFICATION
+    that have encountered identical data collisions during stream evaluation [B].
+    """
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        # Fetch records with exact matching criteria to isolate potential duplicates
+        cursor.execute(
+            """SELECT id, invoice_id, expected_reference, amount, status 
+               FROM customer_payments 
+               WHERE status = 'AWAITING_VERIFICATION' 
+               ORDER BY created_at DESC;"""
+        )
+        records = cursor.fetchall()
+        return {"records": records}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cursor.close()
+        conn.close()
+
+
+@app.post("/api/v1/internal/triage/resolve/{payment_id}")
+async def force_resolve_triage_match(payment_id: str, background_tasks: BackgroundTasks):
+    """
+    Manual Override Engine: Allows a financial manager to forcefully select a candidate record,
+    commit the atomic ledger state transformation to COMPLETED, and trigger background retries [B].
+    """
+    # FIX: Explicitly passing the connection properties array parameters
+    conn = psycopg2.connect(**DB_PARAMS)
+    # FIX: Force the cursor to return an enterprise dictionary mapping object configuration [B]
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    try:
+        # Securely locate the matching tracking invoice code using a string parameter filter
+        cursor.execute("SELECT invoice_id FROM customer_payments WHERE id = %s;", (payment_id,))
+        record = cursor.fetchone()
+        
+        if not record:
+            raise HTTPException(status_code=404, detail="Target tracking record not found inside active table rows.")
+
+        # This will now map cleanly because the dictionary key structure exists natively!
+        target_invoice_id = record["invoice_id"]
+
+        # Atomically force the status parameter to COMPLETED on your PostgreSQL instance
+        update_sql = """
+            UPDATE customer_payments 
+            SET status = 'COMPLETED', clearing_rail_used = 'MANUAL_TRIAGE_OVERRIDE', 
+                matched_at = %s, updated_at = %s
+            WHERE id = %s;
+        """
+        cursor.execute(update_sql, (datetime.now(timezone.utc), datetime.now(timezone.utc), payment_id))
+        conn.commit()
+
+        # Fire asynchronous background task workers to let the merchant CRM know instantly [B]
+        mock_merchant_crm_url = "http://127.0.0"
+        merchant_callback_payload = {
+            "event": "payment.completed",
+            "invoice_id": target_invoice_id,
+            "reconciled_at": datetime.now(timezone.utc).isoformat()
+        }
+        background_tasks.add_task(dispatch_webhook_with_backoff, mock_merchant_crm_url, merchant_callback_payload)
+
+        return {"success": True, "message": "Manual ledger reconciliation override committed successfully."}
+        
+    except Exception as e:
+        conn.rollback()
+        print(f"🚨 [TRIAGE EXCEPTION TRACE] Override operation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal database update failure: {str(e)}")
     finally:
         cursor.close()
         conn.close()
