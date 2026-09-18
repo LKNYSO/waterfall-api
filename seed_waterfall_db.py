@@ -25,7 +25,13 @@ def setup_and_seed_db():
     
     schema_sql = """
     -- Create the Payment Verification Status ENUM
-    CREATE TYPE payment_verification_status AS ENUM (
+    DO $$ 
+    BEGIN 
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'payment_verification_status') THEN 
+            CREATE TYPE payment_verification_status AS ENUM ('UNPAID', 'AWAITING_VERIFICATION', 'PROCESSING_BATCH', 'MATCH_FOUND', 'COMPLETED', 'FAILED_UNVERIFIED'); 
+        END IF; 
+    END $$;
+
         'UNPAID',
         'AWAITING_VERIFICATION',
         'PROCESSING_BATCH',
@@ -140,5 +146,27 @@ def setup_and_seed_db():
     conn.close()
     print("\n🎉 Success! Waterfall API environment is fully prepared for test routing.")
 
+
+    
+
+# --- Add this execution segment right inside your seed_waterfall_db.py script ---
+def patch_cloud_enum_types():
+    conn = psycopg2.connect(SUPABASE_URI)
+    cursor = conn.cursor()
+    try:
+        print("⏳ [PATCH ROUTINE] Injecting 'COMPLETED' state parameter into live Supabase cluster enums...")
+        # Ignore errors if the value already exists by catching exceptions gracefully
+        cursor.execute("ALTER TYPE payment_verification_status ADD VALUE IF NOT EXISTS 'COMPLETED';")
+        conn.commit()
+        print("✅ [PATCH SUCCESS] Cloud database types are perfectly synchronized!")
+    except Exception as e:
+        conn.rollback()
+        print(f"⚠️ Patch trace warning: {str(e)}")
+    finally:
+        cursor.close()
+        conn.close()
+
 if __name__ == "__main__":
-    setup_and_seed_db()
+    #Supabase are already successfully created, we don't need setup_and_seed_db()
+    #setup_and_seed_db()#
+    patch_cloud_enum_types()
