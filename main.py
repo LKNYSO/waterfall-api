@@ -1,4 +1,4 @@
-from fastapi.responses import HTMLResponse  # --- 1. Add this import to the top row header of main.py ---
+from fastapi.responses import JSONResponse, HTMLResponse  # --- 1. Add this import to the top row header of main.py ---
 from webhook_worker import dispatch_webhook_with_backoff # Import your new worker framework
 import hashlib
 import uuid
@@ -141,7 +141,11 @@ async def secure_routing_gateway_pipeline(request: Request, call_next):
     # GUARD 1: Bank Webhook IP-Whitelisting
     if path == "/api/v1/webhooks/bank-feed" and client_ip not in TRUSTED_BANK_FEED_IPS:
         print(f"🚨 SECURITY ALARM: Webhook intrusion blocked from IP: {client_ip}")
-        raise HTTPException(status_code=403, detail="Access Denied: Source IP not whitelisted.")
+         # 🚀 FIX: Return a clean JSONResponse directly instead of raising an unhandled exception
+        return JSONResponse(
+            status_code=403,
+            content={"detail": "Access Denied: Source IP address node is not whitelisted by the clearing gateway."}
+        )
         
     # GUARD 2: Inbound Ingestion Client Rate Limiting
     if path == "/api/v1/payments/verify":
@@ -159,7 +163,10 @@ async def secure_routing_gateway_pipeline(request: Request, call_next):
             bucket["last_updated"] = now
             
             if bucket["tokens"] < 1.0:
-                raise HTTPException(status_code=429, detail="Rate limit exceeded. Maximum 200 requests/min allowed.")
+                return JSONResponse(
+                    status_code=429,
+                    content={"detail": "Rate limit exceeded. Maximum 200 requests/min allowed."}
+                )
             bucket["tokens"] -= 1.0
 
     # If all routing blocks pass, let traffic execute core script logic
