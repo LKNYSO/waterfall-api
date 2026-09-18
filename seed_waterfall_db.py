@@ -3,33 +3,23 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import uuid
 from datetime import datetime, timedelta, timezone
 
-# 1. Database Connection Configuration
-# Adjust these parameters to match your local PostgreSQL setup
-DB_HOST = "localhost"
-DB_NAME = "waterfall_api_dev"
-DB_USER = "postgres"
-DB_PASSWORD = "nap0130n@PSQL"  # Replace with your local master password
-DB_PORT = "5432"
+# #1. Cloud Database Connection Configuration (Supabase Instance Pooler)
+# Note: Punctuation characters are URL-encoded securely to prevent URI syntax string crashes [B]
+SUPABASE_URI = "postgresql://postgres.faonspoqastaempflpee:mp3EjNdA9A3qFv0e@aws-0-eu-central-1.pooler.supabase.com:5432/postgres"
+
 
 def setup_and_seed_db():
-    print("🚀 Initializing Waterfall API Local Database Setup...")
+    print("🚀 Initializing Waterfall API Supabase Setup...")
+
+    # 🔒 Clear out local scope gaps and force the engine to grab your line 8 cloud parameters
+    global SUPABASE_URI
     
     # Connect to default postgres database to create our development DB if it doesn't exist
-    conn = psycopg2.connect(host=DB_HOST, user=DB_USER, password=DB_PASSWORD, port=DB_PORT, database="postgres")
+    conn = psycopg2.connect(SUPABASE_URI)
     conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT)
     cursor = conn.cursor()
     
-    # Drop existing DB for a clean slate, then recreate it
-    cursor.execute(f"DROP DATABASE IF EXISTS {DB_NAME};")
-    cursor.execute(f"CREATE DATABASE {DB_NAME};")
-    cursor.close()
-    conn.close()
-    print(f"✅ Database '{DB_NAME}' created successfully.")
-
-    # Reconnect to our brand new development database
-    conn = psycopg2.connect(host=DB_HOST, user=DB_USER, password=DB_PASSWORD, port=DB_PORT, database=DB_NAME)
-    cursor = conn.cursor()
-
+    
     # 2. Execute Table Architecture Setup
     print("🛠️ Building schema and creating indexes...")
     

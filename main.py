@@ -34,17 +34,16 @@ TRUSTED_BANK_FEED_IPS = [
     "196.22.4.1"       # Example simulated local financial gateway server block
 ]
 
-# Database Parameters (Matches your seeding script setup)
-DB_PARAMS = {
-    "host": "localhost",
-    "database": "waterfall_api_dev",
-    "user": "postgres",
-    "password": "nap0130n@PSQL",  # Replace with your local master password
-    "port": "5432"
-}
+# --- UPDATE THE DATABASE SETTINGS BLOCK AT THE TOP OF main.py ---
+
+# Production Database Parameters (Live Managed Supabase Cloud Cluster)
+# Note: Punctuation characters are URL-encoded securely to prevent URI syntax crashes [B]
+DB_URI_PROD = "postgresql://postgres:nap%40130m%40PSQL@aws-0-eu-central-1.pooler.supabase.com:5432/postgres"
 
 def get_db_connection():
-    return psycopg2.connect(**DB_PARAMS, cursor_factory=RealDictCursor)
+    # Pass your live production cloud URI straight into the psycopg2 driver connection handler [B]
+    return psycopg2.connect(DB_URI_PROD)
+
 
 # Initialize FastAPI's built-in Bearer Extraction security tool
 security_bearer = HTTPBearer()
@@ -411,8 +410,8 @@ async def force_resolve_triage_match(payment_id: str, background_tasks: Backgrou
     Manual Override Engine: Allows a financial manager to forcefully select a candidate record,
     commit the atomic ledger state transformation to COMPLETED, and trigger background retries [B].
     """
-    # FIX: Explicitly passing the connection properties array parameters
-    conn = psycopg2.connect(**DB_PARAMS)
+    # UPDATE: Supabase connection 
+    conn = psycopg2.connect(DB_URI_PROD)
     # FIX: Force the cursor to return an enterprise dictionary mapping object configuration [B]
     cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     try:
