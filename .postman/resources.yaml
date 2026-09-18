@@ -3,5 +3,4 @@ workspace:
   id: bb71ec68-6a9f-4b14-8625-c066c48626c5
 
 localResources:
-  environments:
-    - ../Waterfall API - Local Dev-1.environment.yaml
+  environments: []

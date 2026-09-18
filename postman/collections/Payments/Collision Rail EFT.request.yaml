@@ -1,0 +1,20 @@
+$kind: http-request
+description: ""
+url: "{{base_url}}/api/v1/webhooks/bank-feed"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"event_type\": \"transaction.received\",\r
+
+    \    \"bank_transaction_id\": \"001_tx_inst_cl0778899\",\r
+
+    \    \"amount_received\": 5000.00, \r
+
+    \    \"raw_bank_description\": \"... /REF: MUNI-BLANKS-1\", \r
+
+    \    \"clearing_rail\": \"EFT\"\r
+
+    }"
+order: 4503210903974918

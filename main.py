@@ -38,7 +38,7 @@ TRUSTED_BANK_FEED_IPS = [
 
 # Production Database Parameters (Live Managed Supabase Cloud Cluster)
 # Note: Punctuation characters are URL-encoded securely to prevent URI syntax crashes [B]
-DB_URI_PROD = "postgresql://postgres:nap%40130m%40PSQL@aws-0-eu-central-1.pooler.supabase.com:5432/postgres"
+DB_URI_PROD = "postgresql://postgres.faonspoqastaempflpee:mp3EjNdA9A3qFv0e@aws-0-eu-central-1.pooler.supabase.com:5432/postgres"
 
 def get_db_connection():
     # Pass your live production cloud URI straight into the psycopg2 driver connection handler [B]
