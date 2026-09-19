@@ -133,7 +133,7 @@ async def secure_routing_gateway_pipeline(request: Request, call_next):
         # 🛡️ Proxy-Aware Extraction: Check the load balancer header first, fall back to direct socket
     x_forwarded_for = request.headers.get("X-Forwarded-For")
     if x_forwarded_for:
-        client_ip = str(x_forwarded_for.split(",")[0]).strip()
+        client_ip = x_forwarded_for.split(",")[0].strip()
     else:
         client_ip = request.client.host if request.client else "127.0.0.1"
 
