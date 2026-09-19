@@ -270,7 +270,7 @@ async def process_bank_webhook(payload: BankFeedWebhook, background_tasks: Backg
     Streams raw bank data feeds, executes the matching rules, and commits state transformations.
     """
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)  # 🚀 Fixes the Tuple index crash!
     try:
         cursor.execute(
             "SELECT id, invoice_id, expected_reference FROM customer_payments WHERE status IN ('AWAITING_VERIFICATION', 'PROCESSING_BATCH') AND amount = %s;",
