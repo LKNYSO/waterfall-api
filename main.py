@@ -33,6 +33,7 @@ TRUSTED_BANK_FEED_IPS = [
     "102.132.0.1",     # Example simulated trusted bank feed proxy IP
     "196.22.4.1"       # Example simulated local financial gateway server block
     "41.126.241.234"   # verified laptop public IP address allocation
+    "41.126.203.134"   # verified laptop public IP address allocation
 ]
 
 # --- UPDATE THE DATABASE SETTINGS BLOCK AT THE TOP OF main.py ---
@@ -132,7 +133,7 @@ async def secure_routing_gateway_pipeline(request: Request, call_next):
         # 🛡️ Proxy-Aware Extraction: Check the load balancer header first, fall back to direct socket
     x_forwarded_for = request.headers.get("X-Forwarded-For")
     if x_forwarded_for:
-        client_ip = x_forwarded_for.split(",")[0].strip()
+        client_ip = str(x_forwarded_for.split(",")[0]).strip()
     else:
         client_ip = request.client.host if request.client else "127.0.0.1"
 
