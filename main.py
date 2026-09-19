@@ -142,6 +142,7 @@ async def secure_routing_gateway_pipeline(request: Request, call_next):
     # GUARD 1: Bank Webhook IP-Whitelisting
     if "/api/v1/webhooks/bank-feed" in path and client_ip not in TRUSTED_BANK_FEED_IPS:
         print(f"🚨 SECURITY ALARM: Webhook intrusion blocked from IP: {client_ip}")
+        print(f"🚨 PATH: path: {path}")
          # 🚀 FIX: Return a clean JSONResponse directly instead of raising an unhandled exception
         return JSONResponse(
             status_code=403,
