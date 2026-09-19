@@ -31,8 +31,8 @@ RATE_LIMIT_BUCKETS = {}
 TRUSTED_BANK_FEED_IPS = [
     "127.0.0.1",       # Permits your local Postman testing queries
     "102.132.0.1",     # Example simulated trusted bank feed proxy IP
-    "196.22.4.1"       # Example simulated local financial gateway server block
-    "41.126.241.234"   # verified laptop public IP address allocation
+    "196.22.4.1",       # Example simulated local financial gateway server block
+    "41.126.241.234",   # verified laptop public IP address allocation
     "41.126.203.134"   # verified laptop public IP address allocation
 ]
 
