@@ -46,6 +46,8 @@
             try {
                 const res = await fetch('/api/v1/internal/triage/queue');
                 const data = await res.json();
+                // 📡 TELEMETRY TRACE: Print the exact backend data structure to the browser inspector
+                console.log("🚀 RAW API RESPONSE BODY:", data);
                 const container = document.getElementById('dashboard-content');
                 container.innerHTML = '';
 
