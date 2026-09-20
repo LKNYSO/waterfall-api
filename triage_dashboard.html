@@ -57,6 +57,13 @@
                 }
 
                 data.records.forEach(rec => {
+                    // indexing rec to access values
+                    const indxAmount = rec[3];
+                    const indxInvoiceId = rec[1];
+                    const indxExpected = rec[2];
+                    const indxStatus = rec[4];
+                    const indxId = rec[0];
+
                     const card = document.createElement('div');
                     card.className = 'collision-card';
                     card.innerHTML = `
@@ -64,24 +71,24 @@
                             <strong>Data Collision Alert: Identity Ambiguity Detected</strong>
                             <span class="badge">Cent Parity Match Conflict</span>
                         </div>
-                        <div class="amount-badge">R ${parseFloat(rec.amount).toFixed(2)}</div>
+                        <div class="amount-badge">R ${parseFloat(indxAmount).toFixed(2)}</div>
                         <div class="meta-row">
                             <div class="meta-item">
                                 <label>Invoice ID (Immutable Key)</label>
-                                <span>${rec.invoice_id}</span>
+                                <span>${indxInvoiceId}</span>
                             </div>
                             <div class="meta-item">
                                 <label>Expected Reference Target</label>
-                                <span>${rec.expected_reference}</span>
+                                <span>${indxExpected}</span>
                             </div>
                             <div class="meta-item">
                                 <label>System State</label>
-                                <span style="color: #DD6B20;">${rec.status}</span>
+                                <span style="color: #DD6B20;">${indxStatus}</span>
                             </div>
                         </div>
                         <div class="action-bar">
-                            <button class="btn-dismiss" onclick="dismissRecord('${rec.id}')">Isolate File Log</button>
-                            <button class="btn-resolve" onclick="forceResolveMatch('${rec.id}', '${rec.invoice_id}')">Credit Account Manually</button>
+                            <button class="btn-dismiss" onclick="dismissRecord('${indxId}')">Isolate File Log</button>
+                            <button class="btn-resolve" onclick="forceResolveMatch('${indxId}', '${indxInvoiceId}')">Credit Account Manually</button>
                         </div>
                     `;
                     container.appendChild(card);
