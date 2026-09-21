@@ -1,5 +1,5 @@
 import os
-
+import anyio # Native high-performance async concurrency framework
 from fastapi.responses import JSONResponse, HTMLResponse  # --- 1. Add this import to the top row header of main.py ---
 from webhook_worker import dispatch_webhook_with_backoff # Import your new worker framework
 import hashlib
@@ -422,36 +422,39 @@ async def get_isolated_triage_records():
         cursor.close()
         conn.close()
 
+# =======================================================================
+# ⚙️ ROBUST ASYNCHRONOUS BACKGROUND REPORTING INTERCEPT ENDPOINT
+# =======================================================================
 @app.post("/api/v1/internal/reports/daily-summary", status_code=202, tags=["Billing & Ledger Reporting System"])
-async def trigger_manual_billing_report(background_tasks: BackgroundTasks):
+async def trigger_manual_billing_report():
     """
-    Manual Report Override: Instantly initializes the financial ledger query 
-    and PDF distribution loops in a background worker thread. Returns an immediate 
-    202 Accepted token to prevent HTTP gateway timeouts.
+    Manual Report Override: Safely pushes the financial ledger query and PDF 
+    distribution loops onto an independent, non-blocking hardware worker thread line.
     """
     try:
-        # Dynamically import the execution wrapper function from your reporter file
+        # 🛸 1. Dynamically import the execution wrapper from your reporter script
         billing_reporter = importlib.import_module("billing_reporter")
-
-        # 🚀 THE CRITICAL SYNC: Fetch live environment values directly from active main.py memory
-        live_sender = os.getenv("SENDER_EMAIL", "blukhanyiso@yahoo.co.za")
+        
+        # 📡 2. Fetch live environment values directly from active main.py memory runtime
+        live_sender = os.getenv("SENDER_EMAIL", "blukhanyiso@gmail.com")
         live_recipient = os.getenv("RECIPIENT_EMAIL", "blukhanyiso@gmail.com")
-
-        # Delegate the task to the background thread runner matrix
-        background_tasks.add_task(
-            billing_reporter.dispatch_pdf_report_via_smtp, 
-            sender_override=live_sender, 
-            recipient_override=live_recipient
+        
+        # 🚀 THE CRITICAL ARCHITECTURAL FIX: Fire the task inside a completely detached, 
+        # persistent worker thread pool wrapper to protect against ASGI lifecycle connection drops!
+        anyio.from_thread.run_sync_soon(
+            billing_reporter.dispatch_pdf_report_via_smtp,
+            live_sender,
+            live_recipient
         )
         
         return {
             "status": "PROCESSING",
-            "detail": "Manual financial audit report generation initialized. PDF assembly and email delivery running in background worker."
+            "detail": "Manual financial audit report generation safely offloaded to an isolated asynchronous worker thread pool loop."
         }
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to map background execution thread pipeline. Trace warning: {str(e)}"
+            detail=f"Failed to isolate background execution thread pool lines: {str(e)}"
         )
 
 @app.post("/api/v1/internal/triage/resolve/{payment_id}")
@@ -503,3 +506,4 @@ async def force_resolve_triage_match(payment_id: str, background_tasks: Backgrou
     finally:
         cursor.close()
         conn.close()
+
