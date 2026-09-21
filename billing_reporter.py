@@ -27,7 +27,7 @@ except ImportError:  # pragma: no cover - dependency is installed through requir
 # =======================================================================
 # 📡 INFRASTRUCTURE CREDENTIALS & CONSTANTS
 # =======================================================================
-DATABASE_URL = "postgresql://postgres:postgres@localhost:5432/waterfall"
+DATABASE_URL = "postgresql://postgres:mp3EjNdA9A3qFv0e@db.faonspoqastaempflpee.supabase.co:5432/postgres"
 
 # Transactional Mail Relay Carrier Parameters (SendGrid Example Relay)
 SMTP_HOST = "smtp.sendgrid.net"
