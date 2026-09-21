@@ -5,6 +5,7 @@ import uuid
 import time
 import jwt
 import psycopg2
+import importlib
 from psycopg2.extras import RealDictCursor
 from datetime import datetime, timedelta, timezone
 from typing import Optional
@@ -419,6 +420,29 @@ async def get_isolated_triage_records():
         cursor.close()
         conn.close()
 
+@app.post("/api/v1/internal/reports/daily-summary", status_code=202, tags=["Billing & Ledger Reporting System"])
+async def trigger_manual_billing_report(background_tasks: BackgroundTasks):
+    """
+    Manual Report Override: Instantly initializes the financial ledger query 
+    and PDF distribution loops in a background worker thread. Returns an immediate 
+    202 Accepted token to prevent HTTP gateway timeouts.
+    """
+    try:
+        # Dynamically import the execution wrapper function from your reporter file
+        billing_reporter = importlib.import_module("billing_reporter")
+        
+        # Delegate the task to the background thread runner matrix
+        background_tasks.add_task(billing_reporter.dispatch_pdf_report_via_smtp)
+        
+        return {
+            "status": "PROCESSING",
+            "detail": "Manual financial audit report generation initialized. PDF assembly and email delivery running in background worker."
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to map background execution thread pipeline. Trace warning: {str(e)}"
+        )
 
 @app.post("/api/v1/internal/triage/resolve/{payment_id}")
 async def force_resolve_triage_match(payment_id: str, background_tasks: BackgroundTasks):
