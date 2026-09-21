@@ -33,9 +33,9 @@ DATABASE_URL = os.getenv("DATABASE_URL") or "postgresql://postgres:postgres@loca
 SMTP_HOST = os.getenv("SMTP_HOST", "smtp.sendgrid.net")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "465"))  # Default SendGrid SMTP port for TLS
 SMTP_USER = os.getenv("SMTP_USER", "apikey") # SendGrid requires the literal username 'apikey'
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "your_sendgrid_api_key_here")
-RECIPIENT_EMAIL = os.getenv("RECIPIENT_EMAIL", "finance-ops@yourdomain.com")
-SENDER_EMAIL = os.getenv("SENDER_EMAIL", "automated-billing@yourdomain.com")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "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")
+RECIPIENT_EMAIL = os.getenv("RECIPIENT_EMAIL", "blukhanyiso@gmail.com")
+SENDER_EMAIL = os.getenv("SENDER_EMAIL", "blukhanyiso@gmail.com")
 
 def compile_daily_financial_ledger_pdf() -> str:
     """Queries Supabase, unpacks positional database tuples, and builds the statement PDF."""
