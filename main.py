@@ -1,3 +1,5 @@
+import os
+
 from fastapi.responses import JSONResponse, HTMLResponse  # --- 1. Add this import to the top row header of main.py ---
 from webhook_worker import dispatch_webhook_with_backoff # Import your new worker framework
 import hashlib
@@ -430,9 +432,17 @@ async def trigger_manual_billing_report(background_tasks: BackgroundTasks):
     try:
         # Dynamically import the execution wrapper function from your reporter file
         billing_reporter = importlib.import_module("billing_reporter")
-        
+
+        # 🚀 THE CRITICAL SYNC: Fetch live environment values directly from active main.py memory
+        live_sender = os.getenv("SENDER_EMAIL", "blukhanyiso@yahoo.co.za")
+        live_recipient = os.getenv("RECIPIENT_EMAIL", "blukhanyiso@gmail.com")
+
         # Delegate the task to the background thread runner matrix
-        background_tasks.add_task(billing_reporter.dispatch_pdf_report_via_smtp)
+        background_tasks.add_task(
+            billing_reporter.dispatch_pdf_report_via_smtp, 
+            sender_override=live_sender, 
+            recipient_override=live_recipient
+        )
         
         return {
             "status": "PROCESSING",

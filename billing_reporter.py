@@ -140,16 +140,20 @@ def compile_daily_financial_ledger_pdf() -> str:
     print(f"✨ Report compiled cleanly onto temporary container volume disk storage: {output_filename}")
     return output_filename
 
-def dispatch_pdf_report_via_smtp():
+def dispatch_pdf_report_via_smtp(sender_override=None, recipient_override=None):
     """Executes full operational cycle pipeline: generates file, opens secure SMTP ports, delivers."""
     try:
-        print("🚀 Initializing automated billing ledger distribution sequence...")
-        pdf_filepath = compile_daily_financial_ledger_pdf()
+        # Fall back to global constants only if no override is provided by main.py
+        active_sender = sender_override or SENDER_EMAIL
+        active_recipient = recipient_override or RECIPIENT_EMAIL
         
+        print(f"🚀 Launching report distribution sequence. Sender: {active_sender} | Recipient: {active_recipient}")
+        pdf_filepath = compile_daily_financial_ledger_pdf()
+
         # Build multi-part MIME content envelope components
         msg = MIMEMultipart()
-        msg['From'] = SENDER_EMAIL
-        msg['To'] = RECIPIENT_EMAIL
+        msg['From'] = active_sender
+        msg['To'] = active_recipient
         msg['Subject'] = f"📊 Waterfall API - Daily Financial Ledger Summary Statement [{datetime.now().strftime('%Y-%m-%d')}]"
         
         body_text = "Greetings Operations Desk,\n\nPlease find attached the comprehensive automated 24-hour financial transaction audit ledger statement compiled natively from your cloud cluster database.\n\nSystem Core Automation Engine"
@@ -168,7 +172,7 @@ def dispatch_pdf_report_via_smtp():
         # 🚀 THE FIX: Use SMTP_SSL natively on port 465 to bypass cloud proxy network blocks!
         server = smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT)
         server.login(SMTP_USER, SMTP_PASSWORD)
-        server.sendmail(SENDER_EMAIL, RECIPIENT_EMAIL, msg.as_string())
+        server.sendmail(active_sender, active_recipient, msg.as_string())
         server.quit()
 
         
