@@ -31,7 +31,7 @@ DATABASE_URL = os.getenv("DATABASE_URL") or "postgresql://postgres:postgres@loca
 
 # Transactional Mail Relay Carrier Parameters (SendGrid Example Relay)
 SMTP_HOST = os.getenv("SMTP_HOST", "smtp.sendgrid.net")
-SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+SMTP_PORT = int(os.getenv("SMTP_PORT", "465"))  # Default SendGrid SMTP port for TLS
 SMTP_USER = os.getenv("SMTP_USER", "apikey") # SendGrid requires the literal username 'apikey'
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "your_sendgrid_api_key_here")
 RECIPIENT_EMAIL = os.getenv("RECIPIENT_EMAIL", "finance-ops@yourdomain.com")
@@ -163,13 +163,14 @@ def dispatch_pdf_report_via_smtp():
             part.add_header("Content-Disposition", f"attachment; filename={pdf_filepath}")
             msg.attach(part)
             
-        print(f"📡 Opening cryptographic secure transport channel connection to {SMTP_HOST}:{SMTP_PORT}...")
-        # Open communication socket stream, execute TLS handshake, log in, and dispatch data packets
-        server = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
-        server.starttls() 
+        print(f"📡 Opening cryptographic secure SSL transport channel connection to {SMTP_HOST}:{SMTP_PORT}...")
+        
+        # 🚀 THE FIX: Use SMTP_SSL natively on port 465 to bypass cloud proxy network blocks!
+        server = smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT)
         server.login(SMTP_USER, SMTP_PASSWORD)
         server.sendmail(SENDER_EMAIL, RECIPIENT_EMAIL, msg.as_string())
         server.quit()
+
         
         # Volatile Disk Housekeeping: Wipe the temporary local PDF trace to protect memory boundaries
         if os.path.exists(pdf_filepath):
