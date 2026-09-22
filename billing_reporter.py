@@ -2,6 +2,9 @@ import os
 import sys
 import smtplib
 import psycopg2
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail, Attachment, FileContent, FileName, FileType, Disposition
+import base64
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -152,50 +155,53 @@ def compile_daily_financial_ledger_pdf() -> str:
     print(f"✨ Report compiled cleanly onto temporary container volume disk storage: {output_filename}")
     return output_filename
 
-def dispatch_pdf_report_via_smtp(sender_override=None, recipient_override=None):
-    """Executes full operational cycle pipeline: generates file, opens secure SMTP ports, delivers."""
+def dispatch_pdf_report_via_smtp(sender_override: str = None, recipient_override: str = None):
+    """Executes full operational cycle pipeline: generates PDF, encodes binary data, and dispatches via Web API SDK."""
     try:
-        # Fall back to global constants only if no override is provided by main.py
-        active_sender = sender_override or SENDER_EMAIL
-        active_recipient = recipient_override or RECIPIENT_EMAIL
+        active_sender = sender_override or "blukhanyiso@gmail.com"
+        active_recipient = recipient_override or "blukhanyiso@gmail.com"
         
-        print(f"🚀 Launching report distribution sequence. Sender: {active_sender} | Recipient: {active_recipient}")
+        print(f"🚀 Initializing high-performance SendGrid Web API delivery chain...")
         pdf_filepath = compile_daily_financial_ledger_pdf()
-
-        # Build multi-part MIME content envelope components
-        msg = MIMEMultipart()
-        msg['From'] = active_sender
-        msg['To'] = active_recipient
-        msg['Subject'] = f"📊 Waterfall API - Daily Financial Ledger Summary Statement [{datetime.now().strftime('%Y-%m-%d')}]"
         
-        body_text = "Greetings Operations Desk,\n\nPlease find attached the comprehensive automated 24-hour financial transaction audit ledger statement compiled natively from your cloud cluster database.\n\nSystem Core Automation Engine"
-        msg.attach(MIMEText(body_text, 'plain'))
+        # 📊 1. Compile the Primary Mail Content Envelope
+        message = Mail(
+            from_email=active_sender,
+            to_emails=active_recipient,
+            subject=f"📊 Waterfall API - Daily Financial Ledger Summary Statement [{datetime.now().strftime('%Y-%m-%d')}]",
+            plain_text_content="Greetings Operations Desk,\n\nPlease find attached the comprehensive automated 24-hour financial transaction audit ledger statement compiled natively from your cloud cluster database.\n\nSystem Core Automation Engine"
+        )
         
-        # Read the compiled binary PDF code data off the disk track lines
-        with open(pdf_filepath, "rb") as attachment:
-            part = MIMEBase("application", "octet-stream")
-            part.set_payload(attachment.read())
-            encoders.encode_base64(part)
-            part.add_header("Content-Disposition", f"attachment; filename={pdf_filepath}")
-            msg.attach(part)
+        # 📂 2. Read and Convert the compiled PDF binary data into Base64 format string parameters
+        with open(pdf_filepath, "rb") as f:
+            encoded_pdf_bytes = base64.b64encode(f.read()).decode()
             
-        print(f"📡 Opening cryptographic secure SSL transport channel connection to {SMTP_HOST}:{SMTP_PORT}...")
+        # 🔗 3. Attach the encoded canvas file block straight onto the payload transport wrapper
+        attached_file = Attachment(
+            FileContent(encoded_pdf_bytes),
+            FileName(pdf_filepath),
+            FileType("application/pdf"),
+            Disposition("attachment")
+        )
+        message.attachment = attached_file
         
-        # 🚀 THE FIX: Use SMTP_SSL natively on port 465 to bypass cloud proxy network blocks!
-        server = smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT)
-        server.login(SMTP_USER, SMTP_PASSWORD)
-        server.sendmail(active_sender, active_recipient, msg.as_string())
-        server.quit()
-
+        # 📡 4. Initialize the official Web client using your hardcoded Secret API key password token string
+        # 🚀 REPLACE THIS PLACEHOLDER WITH YOUR REAL 'SG.' SECRET KEY STRING FOR INTENTIONAL CLEARANCE
+        secret_api_key = "SG.your_actual_sendgrid_secret_key_here"
+        
+        sg_client = SendGridAPIClient(secret_api_key)
+        response = sg_client.send(message)
+        
+        print(f"✨ SendGrid Web API response transaction cleared! Status Code Badge: {response.status_code}")
         
         # Volatile Disk Housekeeping: Wipe the temporary local PDF trace to protect memory boundaries
         if os.path.exists(pdf_filepath):
             os.remove(pdf_filepath)
             
-        print("✨ SUCCESS! Financial statement distribution loop executed flawlessly across the public gateway web!")
+        print("🏆 SUCCESS! Financial statement distribution loop executed flawlessly across the HTTP REST gateway!")
         
     except Exception as e:
-        print(f"🚨 [CRITICAL REPORT RUNTIME ERROR] Sequence collapsed: {str(e)}")
+        print(f"🚨 [CRITICAL WEB API RUNTIME ERROR] Sequence collapsed: {str(e)}")
         raise e
 
 if __name__ == "__main__":
