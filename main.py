@@ -8,7 +8,6 @@ import time
 import jwt
 import psycopg2
 import importlib
-import openai
 from pinecone import Pinecone
 from psycopg2.extras import RealDictCursor
 from datetime import datetime, timedelta, timezone
@@ -16,6 +15,8 @@ from typing import Optional
 from fastapi import FastAPI, HTTPException, Header, status, Depends, Request, BackgroundTasks
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field, UUID4
+from sentence_transformers import SentenceTransformer
+import google.generativeai as genai
 
 # Initialize FastAPI Web Server
 app = FastAPI(title="Waterfall API", version="1.0.0")
@@ -76,7 +77,7 @@ class PaymentVerifyRequest(BaseModel):
     expected_reference: str = Field(..., example="INV-2026-9999")
 
 # =======================================================================
-# 🤖 ADVANCED RETRIEVAL-AUGMENTED GENERATION (RAG) PITCHOVER ENGINE
+# 🤖 100% FREE RETRIEVAL-AUGMENTED GENERATION (RAG) PITCHOVER ENGINE
 # =======================================================================
 class JudgeQueryRequest(BaseModel):
     question: str
@@ -84,6 +85,10 @@ class JudgeQueryRequest(BaseModel):
 class AIResponseModel(BaseModel):
     answer: str
     match_status: str = "SEMANTIC_RETRIEVAL_SUCCESS"
+
+# Global Free Local Embeddings Cache (Initialized once on app container boot)
+print("⏳ Pre-loading local sentence-transformers model weights...")
+local_embedder = SentenceTransformer('all-MiniLM-L6-v2')
 
 @app.get("/pitch/ask", response_class=HTMLResponse, tags=["Pitch Evaluation System"])
 async def serve_pitch_evening_chat_client():
@@ -100,27 +105,22 @@ async def serve_pitch_evening_chat_client():
 
 @app.post("/api/v1/pitch/rag", response_model=AIResponseModel, tags=["Pitch Evaluation System"])
 async def pitch_evening_rag_gateway(payload: JudgeQueryRequest):
-    """Live Jury RAG Gateway: Vectorises query, queries Pinecone, synthesises answer."""
+    """Live Jury RAG Gateway: Runs free local vector search and free Gemini synthesis."""
     try:
         user_query = payload.question.strip()
         if not user_query:
             raise HTTPException(status_code=400, detail="Query string field cannot be empty.")
             
-        # 🚀 THE FIX: Explicitly set hardcoded authentication values to clear async thread scoping drops
-        openai.api_key = "your-actual-openai-api-key-here"
-        pinecone_key = "your-actual-pinecone-api-key-here"
+        # 🚀 THE FREE FIX: Enforce your zero-cost cloud tokens
+        pinecone_key = "pcsk_3eEVBB_QTWeWA2W1TzrEhH2Q5KXRQ474i1zPx2XJcAQ18stJ1Fx5dCXXvSHGVDnxgUXEMP"
+        gemini_key = "AQ.Ab8RN6L506wCnCCODgwov_JxUJY1E-7mNt1JG1hWdjWYvowrQA"
         
+        # 🧬 1. Convert question to vector array weights locally for free
+        query_vector_weights = local_embedder.encode(user_query).tolist()
+        
+        # 🗄️ 2. Query free Pinecone cluster
         pc = Pinecone(api_key=pinecone_key)
         index = pc.Index("waterfall-pitch-knowledgebase")
-        
-        # 🧬 Convert incoming judge question into vector weights
-        query_vector_res = openai.Embedding.create(
-            input=user_query,
-            model="text-embedding-3-small"
-        )
-        query_vector_weights = query_vector_res['data']['embedding']
-        
-        # 🔍 Run similarity query (Enforce strict top_k=2 constraint to prevent 30s timeouts)
         search_results = index.query(
             vector=query_vector_weights,
             top_k=2,
@@ -129,10 +129,14 @@ async def pitch_evening_rag_gateway(payload: JudgeQueryRequest):
         
         context_fragments = []
         for match in search_results.get('matches', []):
-            if match.get('score', 0) >= 0.35:  # Cosine confidence gate threshold
+            if match.get('score', 0) >= 0.25:  # Normalized semantic boundary gate
                 context_fragments.append(match['metadata']['raw_text'])
                 
-        compiled_context = "\n---\n".join(context_fragments) if context_fragments else "No direct historical architecture match discovered."
+        compiled_context = "\n---\n".join(context_fragments) if context_fragments else "No direct technical match discovered."
+        
+        # 🗣️ 3. Initialize free Gemini language generator model instance
+        genai.configure(api_key=gemini_key)
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         system_instruction_prompt = (
             "You are a brilliant, elite AI Proxy standing in to defend Lukanyiso Brukwe's technical pitch presentation "
@@ -142,23 +146,16 @@ async def pitch_evening_rag_gateway(payload: JudgeQueryRequest):
             "- Answer the judge's question authoritatively, accurately, and concisely using professional software terms.\n"
             "- Reference exact technical metrics from the context data below (such as port 5432, RealDictCursor, proxy headers, pg_cron, etc.) if relevant.\n"
             "- Be direct and honest. If the question falls outside your parameters context, say so gracefully.\n\n"
-            f"AUTHENTIC HISTORICAL SYSTEM ARCHITECTURE CONTEXT:\n{compiled_context}"
+            f"AUTHENTIC HISTORICAL SYSTEM ARCHITECTURE CONTEXT:\n{compiled_context}\n\n"
+            f"Judge's Live Question: {user_query}"
         )
         
-        completion = openai.ChatCompletion.create(
-            model="gpt-4o-mini",  # Low-latency, cost-effective generation track
-            temperature=0.3,      # Controlled deterministic response behavior
-            messages=[
-                {"role": "system", "content": system_instruction_prompt},
-                {"role": "user", "content": f"Judge's Live Question: {user_query}"}
-            ]
-        )
-        
-        ai_generated_answer = completion.choices.message.content
-        return AIResponseModel(answer=ai_generated_answer)
+        # Call Gemini free tier generation endpoint
+        response = model.generate_content(system_instruction_prompt)
+        return AIResponseModel(answer=response.text)
         
     except Exception as e:
-        print(f"🚨 [RAG RUNTIME CRASH] General exception caught: {str(e)}")
+        print(f"🚨 [FREE RAG CRASH] Loop exception caught: {str(e)}")
         return AIResponseModel(
             answer=f"System encountered a processing latency or internal loop error: {str(e)}",
             match_status="INTERNAL_ENGINE_CRASH_500"
