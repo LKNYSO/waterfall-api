@@ -439,9 +439,8 @@ async def trigger_manual_billing_report():
         live_sender = os.getenv("SENDER_EMAIL", "blukhanyiso@gmail.com")
         live_recipient = os.getenv("RECIPIENT_EMAIL", "blukhanyiso@gmail.com")
         
-        # 🚀 THE CRITICAL ARCHITECTURAL FIX: Fire the task inside a completely detached, 
-        # persistent worker thread pool wrapper to protect against ASGI lifecycle connection drops!
-        anyio.from_thread.run_sync_soon(
+        # 🚀 THE ALIGNMENT CORRECTION: Swapping the attribute name to standard AnyIO thread pool specifications
+        await anyio.to_thread.run_sync(
             billing_reporter.dispatch_pdf_report_via_smtp,
             live_sender,
             live_recipient
