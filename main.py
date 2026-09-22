@@ -15,7 +15,6 @@ from typing import Optional
 from fastapi import FastAPI, HTTPException, Header, status, Depends, Request, BackgroundTasks
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field, UUID4
-from sentence_transformers import SentenceTransformer
 import google.generativeai as genai
 
 # Initialize FastAPI Web Server
@@ -86,9 +85,6 @@ class AIResponseModel(BaseModel):
     answer: str
     match_status: str = "SEMANTIC_RETRIEVAL_SUCCESS"
 
-# Global Free Local Embeddings Cache (Initialized once on app container boot)
-print("⏳ Pre-loading local sentence-transformers model weights...")
-local_embedder = SentenceTransformer('all-MiniLM-L6-v2')
 
 @app.get("/pitch/ask", response_class=HTMLResponse, tags=["Pitch Evaluation System"])
 async def serve_pitch_evening_chat_client():
@@ -98,25 +94,31 @@ async def serve_pitch_evening_chat_client():
             html_content = file_buffer.read()
         return HTMLResponse(content=html_content, status_code=200)
     except FileNotFoundError:
-        raise HTTPException(
-            status_code=404, 
-            detail="User interface template 'rag_chat.html' is missing from the container volume root."
-        )
+        raise HTTPException(status_code=404, detail="User interface template 'rag_chat.html' missing.")
 
 @app.post("/api/v1/pitch/rag", response_model=AIResponseModel, tags=["Pitch Evaluation System"])
 async def pitch_evening_rag_gateway(payload: JudgeQueryRequest):
-    """Live Jury RAG Gateway: Runs free local vector search and free Gemini synthesis."""
+    """Live Jury RAG Gateway: Runs cloud-powered vector search and Gemini synthesis."""
     try:
         user_query = payload.question.strip()
         if not user_query:
             raise HTTPException(status_code=400, detail="Query string field cannot be empty.")
             
-        # 🚀 THE FREE FIX: Enforce your zero-cost cloud tokens
+        # 🚀 Hardcode your zero-cost keys to prevent async scoping drops
         pinecone_key = "pcsk_3eEVBB_QTWeWA2W1TzrEhH2Q5KXRQ474i1zPx2XJcAQ18stJ1Fx5dCXXvSHGVDnxgUXEMP"
         gemini_key = "AQ.Ab8RN6L506wCnCCODgwov_JxUJY1E-7mNt1JG1hWdjWYvowrQA"
         
-        # 🧬 1. Convert question to vector array weights locally for free
-        query_vector_weights = local_embedder.encode(user_query).tolist()
+        # Configure Google AI Client Environment
+        genai.configure(api_key=gemini_key)
+        
+        # 🧬 1. Convert question to vector array weights via Google API (0MB local RAM!)
+        response = genai.embed_content(
+            model="models/text-embedding-004",
+            content=user_query,
+            task_type="retrieval_query",
+            output_dimensionality=768
+        )
+        query_vector_weights = response['embedding']
         
         # 🗄️ 2. Query free Pinecone cluster
         pc = Pinecone(api_key=pinecone_key)
@@ -129,13 +131,12 @@ async def pitch_evening_rag_gateway(payload: JudgeQueryRequest):
         
         context_fragments = []
         for match in search_results.get('matches', []):
-            if match.get('score', 0) >= 0.25:  # Normalized semantic boundary gate
+            if match.get('score', 0) >= 0.40:  # Context alignment confidence threshold
                 context_fragments.append(match['metadata']['raw_text'])
                 
         compiled_context = "\n---\n".join(context_fragments) if context_fragments else "No direct technical match discovered."
         
         # 🗣️ 3. Initialize free Gemini language generator model instance
-        genai.configure(api_key=gemini_key)
         model = genai.GenerativeModel('gemini-1.5-flash')
         
         system_instruction_prompt = (
@@ -151,8 +152,8 @@ async def pitch_evening_rag_gateway(payload: JudgeQueryRequest):
         )
         
         # Call Gemini free tier generation endpoint
-        response = model.generate_content(system_instruction_prompt)
-        return AIResponseModel(answer=response.text)
+        gemini_response = model.generate_content(system_instruction_prompt)
+        return AIResponseModel(answer=gemini_response.text)
         
     except Exception as e:
         print(f"🚨 [FREE RAG CRASH] Loop exception caught: {str(e)}")

@@ -1,5 +1,6 @@
 import os
 import re
+import time
 import uuid
 from pinecone import Pinecone, ServerlessSpec
 import google.generativeai as genai
@@ -23,8 +24,9 @@ def create_vector_index_if_not_exists():
         print(f"🗑️ Purging obsolete legacy 384-dimension index: '{INDEX_NAME}'...")
         pc.delete_index(INDEX_NAME)
         print("✅ Obsolete index deleted successfully!")
-
-    if INDEX_NAME not in active_indexes:
+        while INDEX_NAME in [idx.name for idx in pc.list_indexes()]:
+            time.sleep(1)
+    
         print(f"⏳ Provisioning free serverless cloud vector store bucket: '{INDEX_NAME}'...")
         pc.create_index(
             name=INDEX_NAME,
