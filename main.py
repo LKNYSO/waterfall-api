@@ -426,34 +426,28 @@ async def get_isolated_triage_records():
 # ⚙️ ROBUST ASYNCHRONOUS BACKGROUND REPORTING INTERCEPT ENDPOINT
 # =======================================================================
 @app.post("/api/v1/internal/reports/daily-summary", status_code=202, tags=["Billing & Ledger Reporting System"])
-async def trigger_manual_billing_report():
+async def trigger_manual_billing_report(background_tasks: BackgroundTasks):
     """
-    Manual Report Override: Safely pushes the financial ledger query and PDF 
-    distribution loops onto an independent, non-blocking hardware worker thread line.
+    Manual Report Override: Safely registers the financial ledger query and PDF 
+    distribution loops in an asynchronous background task worker. Returns an immediate 
+    202 Accepted response code matrix to bypass HTTP gateway proxy timeouts.
     """
     try:
         # 🛸 1. Dynamically import the execution wrapper from your reporter script
         billing_reporter = importlib.import_module("billing_reporter")
         
-        # 📡 2. Fetch live environment values directly from active main.py memory runtime
-        live_sender = os.getenv("SENDER_EMAIL", "blukhanyiso@gmail.com")
-        live_recipient = os.getenv("RECIPIENT_EMAIL", "blukhanyiso@gmail.com")
-        
-        # 🚀 THE ALIGNMENT CORRECTION: Swapping the attribute name to standard AnyIO thread pool specifications
-        await anyio.to_thread.run_sync(
-            billing_reporter.dispatch_pdf_report_via_smtp,
-            live_sender,
-            live_recipient
-        )
+        # 🚀 THE FIX: Append the task directly to FastAPI's non-blocking background queue runner.
+        # This guarantees your server hands back a 202 instantly, preventing any 502 Bad Gateway timeouts!
+        background_tasks.add_task(billing_reporter.dispatch_pdf_report_via_smtp)
         
         return {
             "status": "PROCESSING",
-            "detail": "Manual financial audit report generation safely offloaded to an isolated asynchronous worker thread pool loop."
+            "detail": "Manual financial audit report generation safely offloaded to background task queue loop."
         }
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to isolate background execution thread pool lines: {str(e)}"
+            detail=f"Failed to isolate background execution thread lines: {str(e)}"
         )
 
 @app.post("/api/v1/internal/triage/resolve/{payment_id}")
