@@ -187,7 +187,7 @@ def dispatch_pdf_report_via_smtp(sender_override: str = None, recipient_override
         
         # 📡 4. Initialize the official Web client using your hardcoded Secret API key password token string
         # 🚀 REPLACE THIS PLACEHOLDER WITH YOUR REAL 'SG.' SECRET KEY STRING FOR INTENTIONAL CLEARANCE
-        secret_api_key = "SG.postgresql://postgres.faonspoqastaempflpee:mp3EjNdA9A3qFv0e@aws-0-eu-central-1.pooler.supabase.com:5432/postgres"
+        secret_api_key = "SG.postgresql://postgres:mp3EjNdA9A3qFv0e@db.faonspoqastaempflpee.supabase.co:5432/postgres"
         
         sg_client = SendGridAPIClient(secret_api_key)
         response = sg_client.send(message)
