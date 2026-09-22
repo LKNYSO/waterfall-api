@@ -27,7 +27,11 @@ except ImportError:  # pragma: no cover - dependency is installed through requir
 # =======================================================================
 # 📡 INFRASTRUCTURE CREDENTIALS & CONSTANTS
 # =======================================================================
-DATABASE_URL = "postgresql://postgres.faonspoqastaempflpee:mp3EjNdA9A3qFv0e@aws-0-eu-central-1.pooler.supabase.com:5432/postgres"
+DATABASE_HOST = "aws-0-eu-central-1.pooler.supabase.com"
+DATABASE_PORT = "5432"
+DATABASE_NAME = "postgres"
+DATABASE_USER = "postgres.faonspoqastaempflpee"
+DATABASE_PASSWORD = "mp3EjNdA9A3qFv0e"
 
 # Transactional Mail Relay Carrier Parameters (SendGrid Example Relay)
 SMTP_HOST = "smtp.sendgrid.net"
@@ -48,7 +52,15 @@ def compile_daily_financial_ledger_pdf() -> str:
     output_filename = f"Waterfall_Daily_Financial_Report_{today_str}.pdf"
     
     print(f"⏳ Connecting straight to production database core on port 5432...")
-    conn = psycopg2.connect(DATABASE_URL)
+    # 🚀 THE FIX: Separate your credentials explicitly into separate arguments 
+    # to stop special characters like '@' or '%' from breaking the network connection string!
+    conn = psycopg2.connect(
+        host="aws-0-eu-central-1.pooler.supabase.com",
+        port="5432",
+        database="postgres",
+        user="postgres.faonspoqastaempflpee",
+        password="mp3EjNdA9A3qFv0e"
+    )
     cursor = conn.cursor()
     
     # Query all records verified or created within the trailing 24-hour cycle
