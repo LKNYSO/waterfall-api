@@ -4,8 +4,163 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Waterfall API - Interactive AI Proxy Agent Workspace</title>
-    <!-- 🚀 THE STYLING FIX: Use the official Tailwind v3 Play Client CDN to parse modern slate utility parameters -->
-    <script src="https://tailwindcss.com"></script>
+       <!-- 🚀 THE DEFINITIVE STYLING FIX: Native self-contained CSS layout matrix -->
+    <style>
+        /* Base styling parameters mapping dark palette variables */
+        body {
+            background-color: #020617; /* Slate-950 */
+            color: #f8fafc; /* Slate-50 */
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        /* Header navigation alignment configurations */
+        header {
+            background-color: #0f172a; /* Slate-900 */
+            border-bottom: 1px solid #1e293b; /* Slate-800 */
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Workspace main container bounds */
+        main {
+            flex: 1;
+            max-width: 56rem; /* Max-w-4xl */
+            width: 100%;
+            margin: 0 auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+        }
+
+        /* Real-time message log viewport stream channel */
+        #chat-stream-box {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 1.5rem;
+            padding-right: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Conversational text frame block cells */
+        .ai-message-cell {
+            display: flex;
+            align-items: start;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid #1e293b;
+            background-color: rgba(15, 23, 42, 0.4); /* Slate-900 / 40% */
+        }
+
+        .user-message-cell {
+            display: flex;
+            align-items: start;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(30, 41, 59, 0.6);
+            background-color: rgba(2, 6, 23, 0.4);
+            margin-left: 3rem;
+        }
+
+        /* UI Badges and icon containers layout */
+        .avatar-badge-ai {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 0.5rem;
+            background-color: #4f46e5; /* Indigo-600 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 0.75rem;
+            color: #ffffff;
+        }
+
+        .avatar-badge-user {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 0.5rem;
+            background-color: #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            border: 1px solid #334155;
+        }
+
+        /* Form submission interface inputs drawer panel */
+        footer {
+            background-color: rgba(15, 23, 42, 0.3);
+            border: 1px solid #1e293b;
+            border-radius: 1rem;
+            padding: 0.75rem;
+        }
+
+        form {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 0.75rem 1rem;
+            color: #f8fafc;
+            font-size: 0.875rem;
+            outline: none;
+        }
+
+        input[type="text"]::placeholder {
+            color: #64748b;
+        }
+
+        button[type="submit"] {
+            background-color: #4f46e5;
+            color: #ffffff;
+            font-weight: 500;
+            font-size: 0.875rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #6366f1;
+        }
+
+        button[type="submit"]:disabled {
+            background-color: #1e293b;
+            color: #475569;
+            cursor: not-allowed;
+        }
+
+        /* Telemetry tracking logs tags styles */
+        .text-mono-indigo { font-family: monospace; color: #818cf8; font-size: 0.75rem; }
+        .text-mono-slate { font-family: monospace; color: #94a3b8; font-size: 0.75rem; }
+        .heading-text { font-size: 0.875rem; font-weight: bold; letter-spacing: 0.05em; text-transform: uppercase; color: #e2e8f0; margin: 0; }
+        .subheading-text { font-size: 0.75rem; color: #64748b; margin: 0; }
+    </style>
+
 
 
     <style>
@@ -41,8 +196,8 @@
         <div id="chat-stream-box" class="flex-1 space-y-6 overflow-y-auto mb-6 pr-2">
             
             <!-- 🤖 INITIAL SYSTEMS PROXY STATEMENT ENTRY -->
-            <div class="flex items-start gap-4 p-4 rounded-xl border border-slate-900 bg-slate-900/20 backdrop-blur-sm">
-                <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-mono font-bold text-xs text-white shadow-md shadow-indigo-600/20">AI</div>
+            <div class="ai-message-cell flex items-start gap-4 p-4 rounded-xl border border-slate-900 bg-slate-900/20 backdrop-blur-sm">
+                <div class="avatar-badge-ai w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-mono font-bold text-xs text-white shadow-md shadow-indigo-600/20">AI</div>
                 <div class="space-y-1 flex-1">
                     <p class="text-xs font-semibold text-indigo-400 font-mono">System Knowledge Proxy Agent</p>
                     <div class="text-sm text-slate-300 leading-relaxed space-y-2">
@@ -100,8 +255,8 @@
 
             // 👤 APPEND USER QUESTION ENTRY TO CHAT BOX GRID LAYOUT LIVE
             const userMsgHtml = `
-                <div class="flex items-start gap-4 p-4 rounded-xl border border-slate-900/60 bg-slate-950/40 ml-12">
-                    <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center font-mono font-bold text-xs text-slate-400 border border-slate-700">USER</div>
+                <div class="user-message-cell flex items-start gap-4 p-4 rounded-xl border border-slate-900/60 bg-slate-950/40 ml-12">
+                    <div class="avatar-badge-user w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center font-mono font-bold text-xs text-slate-400 border border-slate-700">USER</div>
                     <div class="space-y-1 flex-1">
                         <p class="text-xs font-semibold text-slate-400 font-mono">GenesisBloc Evaluator</p>
                         <p class="text-sm text-slate-200 leading-relaxed">${escapeHtml(questionText)}</p>
@@ -114,8 +269,8 @@
             // 🤖 INITIALIZE TEMPORARY LOADING INDICATOR ANCHOR METRICS
             const loadingIndicatorId = 'loader-' + Date.now();
             const loadingMsgHtml = `
-                <div id="${loadingIndicatorId}" class="flex items-start gap-4 p-4 rounded-xl border border-slate-900 bg-slate-900/20 backdrop-blur-sm animate-pulse">
-                    <div class="w-8 h-8 rounded-lg bg-indigo-900 flex items-center justify-center font-mono font-bold text-xs text-indigo-400 border border-indigo-800">AI</div>
+                <div id="${loadingIndicatorId}" class="ai-message-cell flex items-start gap-4 p-4 rounded-xl border border-slate-900 bg-slate-900/20 backdrop-blur-sm animate-pulse">
+                    <div class="avatar-badge-ai w-8 h-8 rounded-lg bg-indigo-900 flex items-center justify-center font-mono font-bold text-xs text-indigo-400 border border-indigo-800">AI</div>
                     <div class="space-y-2 flex-1">
                         <p class="text-xs font-semibold text-indigo-400 font-mono">Querying Cloud Vector Index...</p>
                         <div class="h-2 bg-slate-800 rounded w-1/3"></div>
@@ -144,8 +299,8 @@
                 const formattedAnswer = rawAnswer.replace(/\n/g, '<br>'); // Simple newline formatting translation loop
 
                 const aiMsgHtml = `
-                    <div class="flex items-start gap-4 p-4 rounded-xl border border-slate-900 bg-slate-900/20 backdrop-blur-sm shadow-inner">
-                        <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-mono font-bold text-xs text-white shadow-md">AI</div>
+                    <div class="ai-message-cell flex items-start gap-4 p-4 rounded-xl border border-slate-900 bg-slate-900/20 backdrop-blur-sm shadow-inner">
+                        <div class="avatar-badge-ai w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-mono font-bold text-xs text-white shadow-md">AI</div>
                         <div class="space-y-1 flex-1">
                             <p class="text-xs font-semibold text-indigo-400 font-mono">System Knowledge Proxy Agent</p>
                             <div class="text-sm text-slate-200 leading-relaxed font-normal">${formattedAnswer}</div>
