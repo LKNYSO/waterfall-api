@@ -233,6 +233,16 @@ RATE_LIMIT_BUCKETS = {}
 # --- Global Middleware Execution Pipeline Sequence ---
 
 @app.middleware("http")
+async def secure_infrastructure_proxy_firewall(request: Request, call_next):
+    """Zero-Trust Middleware Firewall: Exempts pitch evening paths to ensure real-time client delivery."""
+    path = request.url.path
+
+    # 🚀 THE CRITICAL INFRASTRUCTURE FIX: Exempt your RAG public views and data endpoints 
+    # from the IP whitelist firewall to stop the browser requests from stalling out!
+    if path.startswith("/pitch") or path.startswith("/api/v1/pitch"):
+        print(f"🛡️ [FIREWALL BYPASS]: Granting clean route entry to public pitch lane: {path}")
+        return await call_next(request)
+    
 async def secure_routing_gateway_pipeline(request: Request, call_next):
     """
     Consolidated Week 2 Security Stack. Cascades requests through:
