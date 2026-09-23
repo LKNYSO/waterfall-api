@@ -139,8 +139,8 @@ async def pitch_evening_rag_gateway(payload: JudgeQueryRequest):
         compiled_context = "\n---\n".join(context_fragments) if context_fragments else "No direct technical match discovered."
         
         # 🗣️ 3. Initialize free Gemini language generator model instance
-        # 🚀 THE DEFINITIVE FIX: Swap out the deprecated 1.5 string for the active gemini-2.5-flash layer!
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        # 🚀 THE DEFINITIVE FIX: Swap out the deprecated 1.5 string for the active gemini-3.6-flash layer!
+        model = genai.GenerativeModel('gemini-3.6-flash')
         
         system_instruction_prompt = (
             "You are a brilliant, elite AI Proxy standing in to defend Lukanyiso Brukwe's technical pitch presentation "
