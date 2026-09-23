@@ -153,14 +153,24 @@ async def pitch_evening_rag_gateway(payload: JudgeQueryRequest):
         
         # Call Gemini free tier generation endpoint
         gemini_response = model.generate_content(system_instruction_prompt)
-        return {"answer": gemini_response.text}
+                # 🛡️ Defensive Evaluation: Extract text content safely from the Gemini object layer
+        generated_prose = "No direct response token compiled."
+        if hasattr(gemini_response, 'text') and gemini_response.text:
+            generated_prose = gemini_response.text
+        elif hasattr(gemini_response, 'parts') and gemini_response.parts:
+            generated_prose = gemini_response.parts[0].text
+        
+        print(f"🤖 AI Response extracted successfully: {generated_prose[:50]}...")
+
+        # 🚀 THE DEFINITIVE FIX: Send a fully unified, flat JSON payload structure 
+        # that aligns perfectly with your Javascript frontend listener metrics!
+        return {"answer": str(generated_prose)}
         
     except Exception as e:
         print(f"🚨 [FREE RAG CRASH] Loop exception caught: {str(e)}")
-        return AIResponseModel(
-            answer=f"System encountered a processing latency or internal loop error: {str(e)}",
-            match_status="INTERNAL_ENGINE_CRASH_500"
-        )
+        # If the generation crashes, pass the error text in the expected field so the UI can print it!
+        return {"answer": f"System encountered a processing validation error: {str(e)}"}
+
 
 # --- 2. Transient In-Memory Data Anonymisation Logic ---
 
