@@ -153,7 +153,7 @@ async def pitch_evening_rag_gateway(payload: JudgeQueryRequest):
         
         # Call Gemini free tier generation endpoint
         gemini_response = model.generate_content(system_instruction_prompt)
-        return AIResponseModel(answer=gemini_response.text)
+        return {"answer": gemini_response.text}
         
     except Exception as e:
         print(f"🚨 [FREE RAG CRASH] Loop exception caught: {str(e)}")
