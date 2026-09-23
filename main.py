@@ -164,12 +164,18 @@ async def pitch_evening_rag_gateway(payload: JudgeQueryRequest):
 
         # 🚀 THE DEFINITIVE FIX: Send a fully unified, flat JSON payload structure 
         # that aligns perfectly with your Javascript frontend listener metrics!
-        return {"answer": str(generated_prose)}
+        return {
+            "answer": str(generated_prose),
+            "match_status": "SEMANTIC_RETRIEVAL_SUCCESS"
+        }
         
     except Exception as e:
         print(f"🚨 [FREE RAG CRASH] Loop exception caught: {str(e)}")
         # If the generation crashes, pass the error text in the expected field so the UI can print it!
-        return {"answer": f"System encountered a processing validation error: {str(e)}"}
+        return {
+            "answer": f"System encountered a processing validation error: {str(e)}",
+            "match_status": "INTERNAL_ENGINE_CRASH_500"
+        }
 
 
 # --- 2. Transient In-Memory Data Anonymisation Logic ---
