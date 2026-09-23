@@ -111,14 +111,16 @@ async def pitch_evening_rag_gateway(payload: JudgeQueryRequest):
         # Configure Google AI Client Environment
         genai.configure(api_key=gemini_key)
         
-        # 🧬 1. Convert question to vector array weights via Google API (0MB local RAM!)
+        # 🧬 1. Convert question to vector array weights via active Gemini embedding model layers
+        # 🚀 THE CRITICAL FIX: Overwrite the string name parameter to use 'models/gemini-embedding-001'
         response = genai.embed_content(
-            model="models/text-embedding-004",
+            model="models/gemini-embedding-001",
             content=user_query,
             task_type="retrieval_query",
             output_dimensionality=768
         )
         query_vector_weights = response['embedding']
+
         
         # 🗄️ 2. Query free Pinecone cluster
         pc = Pinecone(api_key=pinecone_key)
