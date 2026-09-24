@@ -5,11 +5,16 @@ import uuid
 from pinecone import Pinecone, ServerlessSpec
 import google.generativeai as genai
 # =======================================================================
-# 📡 100% FREE HARDENED VECTOR INITIALIZATION CORE
+# 📡 100% SECURED SERVERLESS CLOUD CORE CONFIGURATION
 # =======================================================================
-PINECONE_API_KEY = "pcsk_3eEVBB_QTWeWA2W1TzrEhH2Q5KXRQ474i1zPx2XJcAQ18stJ1Fx5dCXXvSHGVDnxgUXEMP"
-GEMINI_KEY = "AQ.Ab8RN6L506wCnCCODgwov_JxUJY1E-7mNt1JG1hWdjWYvowrQA"
+# 🚀 THE SECURITY FIX: Swap your raw strings for system memory lookups
+PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
+GEMINI_KEY = os.getenv("GEMINI_API_KEY")
 INDEX_NAME = "waterfall-pitch-knowledgebase"
+
+if not PINECONE_API_KEY or not GEMINI_KEY:
+    raise ValueError("🚨 Local environment error: PINECONE_API_KEY and GEMINI_KEY variables must be set!")
+
 
 # Initialize Cloud Clients
 pc = Pinecone(api_key=PINECONE_API_KEY)

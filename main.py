@@ -1,3 +1,10 @@
+import warnings
+# 🚀 THE LOG CLEANUP: Suppress the legacy FutureWarnings from cluttering your terminal console layout
+warnings.filterwarnings("ignore", category=FutureWarning)
+
+# ... Keep all your original import google.generativeai code exactly the same ...
+import google.generativeai as genai
+
 import os
 import anyio # Native high-performance async concurrency framework
 from fastapi.responses import JSONResponse, HTMLResponse  # --- 1. Add this import to the top row header of main.py ---
@@ -104,9 +111,18 @@ async def pitch_evening_rag_gateway(payload: JudgeQueryRequest):
         if not user_query:
             raise HTTPException(status_code=400, detail="Query string field cannot be empty.")
             
-        # 🚀 Hardcode your zero-cost keys to prevent async scoping drops
-        pinecone_key = "pcsk_3eEVBB_QTWeWA2W1TzrEhH2Q5KXRQ474i1zPx2XJcAQ18stJ1Fx5dCXXvSHGVDnxgUXEMP"
-        gemini_key = "AQ.Ab8RN6L506wCnCCODgwov_JxUJY1E-7mNt1JG1hWdjWYvowrQA"
+        # 🚀 THE SECURITY FIX: Read secrets out of system memory environment scopes dynamically!
+        # This completely purges raw credential strings from your codebase.
+        pinecone_key = os.getenv("PINECONE_API_KEY")
+        gemini_key = os.getenv("GEMINI_API_KEY")
+        
+        # Defensive check: ensure the container has loaded the keys securely
+        if not pinecone_key or not gemini_key:
+            raise HTTPException(
+                status_code=500, 
+                detail="Cloud container is missing critical vector environment variable tokens."
+            )
+
         
         # Configure Google AI Client Environment
         genai.configure(api_key=gemini_key)
