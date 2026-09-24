@@ -149,7 +149,8 @@ async def pitch_evening_rag_gateway(payload: JudgeQueryRequest):
         
         context_fragments = []
         for match in search_results.get('matches', []):
-            if match.get('score', 0) >= 0.40:  # Context alignment confidence threshold
+            # 🚀 THE FIX: Change from >= 0.40 to >= 0.0 to ensure your technical context never gets dropped!
+            if match.get('score', 0) >= 0.0:  # Context alignment confidence threshold
                 context_fragments.append(match['metadata']['raw_text'])
                 
         compiled_context = "\n---\n".join(context_fragments) if context_fragments else "No direct technical match discovered."
