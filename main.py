@@ -150,14 +150,14 @@ async def pitch_evening_rag_gateway(payload: JudgeQueryRequest):
         context_fragments = []
         for match in search_results.get('matches', []):
             # 🚀 THE FIX: Change from >= 0.40 to >= 0.0 to ensure your technical context never gets dropped!
-            if match.get('score', 0) >= 0.0:  # Context alignment confidence threshold
+            if match.get('score', 0) >= 0.40:  # Context alignment confidence threshold
                 context_fragments.append(match['metadata']['raw_text'])
                 
         compiled_context = "\n---\n".join(context_fragments) if context_fragments else "No direct technical match discovered."
         
         # 🗣️ 3. Initialize free Gemini language generator model instance
-        # 🚀 THE HIGH-THROUGHPUT FIX: Switch to the lite model layer to get larger free tier query allocations!
-        model = genai.GenerativeModel('gemini-3.5-flash-lite')
+         # 🚀 THE CRITICAL FIX: Upgrade from 3.5-lite to 2.0-flash to fix the attention-span bug!
+        model = genai.GenerativeModel('gemini-2.0-flash')
 
         
         system_instruction_prompt = (
