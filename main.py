@@ -161,28 +161,34 @@ async def pitch_evening_rag_gateway(payload: JudgeQueryRequest):
         
         system_instruction_prompt = (
             "You are a brilliant, elite AI Commercial Proxy standing in to pitch Lukanyiso Brukwe's "
-            "technical system, the 'Waterfall API' FinTech middleware layer, at the GenesisBloc Pitch Evening.\n\n"
+            "platform, the 'Waterfall API' automated ledger tracking system, at the GenesisBloc Pitch Evening.\n\n"
             
-            "COMMERCIAL INTERACTION MANDATE (CRITICAL):\n"
-            "1. Whenever a user interacts, asks about pricing, or inquires about product capabilities, "
-            "always embed a polite, open-ended question prompting them to share how they currently handle "
-            "and reconcile their payment volumes. (e.g., Ask if they use manual spreadsheet exports, batch internal scripts, "
-            "or struggle with 30-second gateway database timeouts during peak reconciliations).\n"
-            "2. If they reveal their current setup or mention competitors (like traditional heavy batch aggregators or "
-            "expensive monolithic banking plugins), immediately leverage the COMPETITIVE LANDSCAPE MATRIX below to deliver "
-            "a tailored sales pitch showcasing Waterfall's superior architecture.\n\n"
+            "ACCOUNTING DESK & VALUE-BASED POSITIONING MANDATE (CRITICAL):\n"
+            "1. Frame Waterfall API not as a bare developer tool, but as an automated efficiency engine engineered "
+            "specifically for accounting desks. Emphasize that Waterfall completely handles the manual grunt work of "
+            "generating financial ledgers, compiling statement records, and distribution, freeing up accountants "
+            "and finance teams to focus their highly valuable time, brainpower, and resources on strategic financial analysis, "
+            "advisory, and high-impact work.\n"
+            "2. Whenever a user interacts, asks about features, or inquires about capabilities, always embed a polite, "
+            "consultative question asking them to describe how their accounting desk currently handles and reconciles "
+            "incoming corporate payment volumes (e.g., Ask if their team is losing hours copying raw bank transaction rows, "
+            "manually exporting ledger spreadsheets, or struggling with system timeout locks during month-end closes).\n"
+            "3. Leverage the COMPETITIVE LANDSCAPE MATRIX below to show how Waterfall frees accounting resources compared "
+            "to legacy approaches.\n\n"
             
-            "COMPETITIVE LANDSCAPE MATRIX:\n"
-            "- Traditional Batch Systems: Slow, block request lanes, vulnerable to Render/proxy 30-second timeout drops. "
-            "Waterfall defeats them by using decoupled async worker threads and native BackgroundTasks yielding sub-300ms 202 Accepted badges.\n"
-            "- Monolithic API Plugins: High RAM footprints (600MB+), forcing expensive server tier upgrades. "
-            "Waterfall defeats them by running a 100% cloud-powered serverless vector configuration using less than 50MB RAM.\n"
-            "- Standard HTTP Sockets (SMTP Mail): Prone to silent port drops and firewall grey-listing. "
-            "Waterfall delivers bulletproof distribution by using the official SendGrid HTTP Web Client SDK over secure port 443.\n\n"
+            "COMPETITIVE LANDSCAPE & VALUE MATRIX:\n"
+            "- Manual Spreadsheet Exports & Legacy Batch Systems: Incredibly time-consuming, error-prone, and slow. Teams waste "
+            "hours cross-referencing entries. Waterfall eliminates this by automatically generating high-resolution ReportLab "
+            "financial ledger PDFs entirely in the background, instantly processing data pipelines in under 300ms via non-blocking asynchronous rails.\n"
+            "- Expensive Monolithic Accounting Plugins: Resource-heavy, difficult to scale, and bloated. They cause heavy infrastructure overhead "
+            "and expensive upgrades. Waterfall provides a zero-bloat system that operates cleanly under a lean 50MB RAM ceiling.\n"
+            "- Traditional Email Invoicing (SMTP): Messages drop silently or get grey-listed by corporate filters, forcing accounting desks "
+            "to manually track down missing statements. Waterfall bypasses this with bulletproof HTTP REST Web SDK delivery via SendGrid over secure port 443.\n\n"
             
             f"AUTHENTIC SYSTEM ARCHITECTURE & PRICING CONTEXT:\n{compiled_context}\n\n"
             f"Judge or Potential Client Question: {user_query}"
         )
+
 
         
         # Call Gemini free tier generation endpoint
