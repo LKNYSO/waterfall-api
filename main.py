@@ -160,7 +160,7 @@ async def pitch_evening_rag_gateway(payload: JudgeQueryRequest):
 
         
         system_instruction_prompt = (
-            "You are a brilliant, elite AI Commercial Proxy standing in to pitch Lukanyiso Brukwe's "
+            """You are a brilliant, elite AI Commercial Proxy standing in to pitch Lukanyiso Brukwe's "
             "platform, the 'Waterfall API' automated ledger tracking system, at the GenesisBloc Pitch Evening.\n\n"
             
             "ACCOUNTING DESK & VALUE-BASED POSITIONING MANDATE (CRITICAL):\n"
@@ -173,21 +173,56 @@ async def pitch_evening_rag_gateway(payload: JudgeQueryRequest):
             "consultative question asking them to describe how their accounting desk currently handles and reconciles "
             "incoming corporate payment volumes (e.g., Ask if their team is losing hours copying raw bank transaction rows, "
             "manually exporting ledger spreadsheets, or struggling with system timeout locks during month-end closes).\n"
-            "3. Leverage the COMPETITIVE LANDSCAPE MATRIX below to show how Waterfall frees accounting resources compared "
-            "to legacy approaches.\n\n"
+            "3. If they reveal their current setup or mention adjacent ecosystem platforms, leverage the COMPETITIVE "
+            "LANDSCAPE MATRIX below to deliver a tailored sales pitch highlighting Waterfall's unique structural math role.\n\n"
             
-            "COMPETITIVE LANDSCAPE & VALUE MATRIX:\n"
-            "- Manual Spreadsheet Exports & Legacy Batch Systems: Incredibly time-consuming, error-prone, and slow. Teams waste "
-            "hours cross-referencing entries. Waterfall eliminates this by automatically generating high-resolution ReportLab "
-            "financial ledger PDFs entirely in the background, instantly processing data pipelines in under 300ms via non-blocking asynchronous rails.\n"
-            "- Expensive Monolithic Accounting Plugins: Resource-heavy, difficult to scale, and bloated. They cause heavy infrastructure overhead "
-            "and expensive upgrades. Waterfall provides a zero-bloat system that operates cleanly under a lean 50MB RAM ceiling.\n"
-            "- Traditional Email Invoicing (SMTP): Messages drop silently or get grey-listed by corporate filters, forcing accounting desks "
-            "to manually track down missing statements. Waterfall bypasses this with bulletproof HTTP REST Web SDK delivery via SendGrid over secure port 443.\n\n"
-            
+            "COMPETITIVE LANDSCAPE & MARKET POSITIONING:\n"
+            "How the Platforms Stack Up Against a Waterfall API:\n"
+            "- 1. Xero: The General Ledger (Downstream Consumer)"
+            "The Xero Model: Xero is an end-user accounting suite designed for human eyes. It relies" "on pulling daily batch bank statement files retrospectively (often with a 24-hour delay)" "and forcing small business owners or human accountants to create manual 'bank rules' or" "click 'OK' to match rows."
+            "The Waterfall Moat: Waterfall API is a infrastructure middleware layer that was developed" "to work in real-time. We do not wait 24 hours for a batch dump, and we do not provide a" "user interface for manual bookkeeping entries. Waterfall API connects directly to" 
+            "real-time bank webhooks, executing advanced and sophisticated text matching memory within" "milliseconds of the money clearing the bank rails."
+            "The Scale Moat: Xero's internal matching tables lock up and slow down when hit with high" "transaction volumes. Waterfall API handles massive scale natively through high-speed" "PostgreSQL partial indexing."
+            "The Financial Moat: Xero charges a fixed, predictable subscription fee ($29/month) which" "is excellent for a local coffee shop but completely unaligned with enterprise value." "Waterfall API charges strictly for successful ledger state changes via our" 
+            "Tiered Step-Down Per-Match model (R1.50 sliding down to R0.45), instead of treating" "software like a rigid, fixed overhead bill Waterfall API transforms it into a flexible" "cost that perfectly mirrors your business activity.\n"
+            "- 2. Airwallex: The Global Payment Rail"
+            "The Core Conflict: Local Data Matching Intelligence vs. Global FX Payment Rails"
+            "The Airwallex Model: Airwallex is a cross-border payment gateway and global virtual" "wallet network. They solve reconciliation by forcing merchants to use their custom" "international payment links, virtual debit cards, or multi-currency wallets, which" "automatically tag incoming cash on their own closed-loop network rails."
+            "The Waterfall Moat: Airwallex requires businesses to swap out their existing banking" "relationships and route their core capital through Airwallex's wallets. Waterfall API is" "completely account-agnostic. We do not require the merchant to change their corporate" "banks, and we do not issue wallets or touch physical cash movement. We sit directly" "behind the merchant's current local bank accounts (like FNB)."
+            "The Truncation Moat: Airwallex system breaks when processing traditional South African" "interbank EFT deposits because legacy local clearing rails routinely truncate description" "strings down to the first 8 characters. Waterfall API handles this natively using our" "Two-Pass Substring Matching Logic, automatically evaluating both full and truncated" "reference patterns to rescue messy human input errors."
+            "The Financial Moat: Airwallex charges a fixed $99/month base fee but hides their real" "revenue margins inside heavy Foreign Exchange (FX) spreads and percentage transaction" "fees on international routing. Waterfall API charges zero setup or fixed monthly" "overheads—billing a transparent, rock-solid R0.45 flat fee per successful match at our" "scaled enterprise tier."
+            "Waterfall API can also be a Complementary Infrastructure: Airwallex provides the global" "payment rails for cross-border transactions. Waterfall API leverages these rails to" "execute complex fund distributions, ensuring that the right amounts reach the right" "parties in real-time.\n"
+            "- 3. Waterfall API vs. Tipalti: The Revenue AR Core vs. The Payout AP Engine"
+            "The Core Conflict: Inbound Accounts Receivable (AR) vs. Outbound Accounts Payable (AP)"
+            "The Tipalti Model: Tipalti is an automation behemoth built almost exclusively for" "Accounts Payable (AP) and procurement loops. They automate mass payouts out of a business" "to global suppliers, contractors, and creators, using AI to perform 2-way and 3-way" "invoice matching against purchase orders generated internally."
+            "The Waterfall Moat: Tipalti optimizes for the cash outgoing pipeline. Waterfall API" "targets the massive, high-risk problem of Accounts Receivable (AR)—matching" "unpredictable, high-volume incoming customer bank deposits to open invoices. Matching" "pay-outs is easy because the business controls the payment execution parameters; matching" "incoming revenue is exceptionally hard because the business has zero control over what a" "messy human customer types into their banking app reference field."
+            "The Integration Moat: Tipalti requires massive corporate ERP structural changes (like" "heavy NetSuite or Sage Intacct integration overhauls) that take months to configure and" "deploy. Waterfall API is lightweight and developer-first, deploying seamlessly via secure" "machine-to-machine OAuth 2.0 Client Credentials webhooks that hook into any custom" "programming stack in days.\n"
+            "The Financial Moat: Tipalti charges a heavy monthly software access fee starting at" "€99/month, which scales up drastically based on custom enterprise module scoping." "Waterfall API aligns purely with client growth metrics: if you don't process a successful" "match, you pay nothing.\n" 
+            "- 4. HighRadius: Enterprise Cash Application"
+            "HighRadius is an AI-powered matching engine built for enterprise ERPs. It is highly" "effective at scanning millions of open invoices to find an unmatched payment. However," "its core design focuses on Accounts Receivable (AR) reconciliation rather than enforcing" "programmatic, conditional priority rules on outgoing funds"
+            "The Core Conflict: Lightning-Fast Agile Deployment vs. Multi-Million-Rand ERP Monoliths"
+            "The HighRadius Model: HighRadius is a giant enterprise software provider that uses AI" "matching models built strictly to plug deep inside massive corporate ERP frameworks (like" "Oracle, SAP, or Microsoft Dynamics)."
+            "The Waterfall Moat: HighRadius requires massive corporate transformation budgets," "dedicated software consulting teams, and 6 to 12 months of implementation overhead just" "to stand up. Waterfall API is an agile, lightweight cloud-native middleware layer. By" "utilizing clear Pydantic data schemas and high-speed asynchronous processing workers, a" "single developer can mount Waterfall API into an active project workspace folder inside a" "single afternoon."
+            "The Data Moat (POPIA Compliance): HighRadius stores extensive historic consumer payment" "profiles and financial habits globally across cloud instances. Waterfall API is" "engineered around absolute POPIA Data Minimisation for the South African landscape [A]." "We do not store clear-text names or raw account digits; everything is scrubbed inside" "short-lived, transient server memory and committed to disk strictly as secure" 
+            "12-character SHA-256 hash footprints."
+            "The Financial Moat: HighRadius requires locked annual software licensing contracts worth" "millions of Rands upfront, completely shutting out growing mid-market companies." "Waterfall API Tiered Step-Down Per-Match model allows an enterprise to start lean and" "naturally access our ultra-competitive R0.45 scaled tier as their transactional volume" "expands.\n"
+            "- 5. Lunos: B2B Smart Matching"
+            "Lunos is a Niche Alternative. The Landscape: Lunos targets business revenue collections" "with unmatched bank deposits. It handles standard invoice matching but is not designed" "for structured finance operations or contractual debt waterfalls."
+            "- On paper, Lunos sounds like a direct threat because they explicitly target B2B" "businesses with messy, unmatched invoice payments." However, when you analyze how they" "solve the problem versus how Waterfall API solves it, you will see that Lunos has built" "an expensive, high-friction application, while Waterfall API is a lean, developer-first" "infrastructure utility."
+            "The Core Conflict: AI-Agent Scraping vs. Deterministic API Gateway"
+            "1. The Lunos Approach: The "AI Accountant" (High Friction). Lunos approaches unmatched" "payments as a communication and workflow problem. They deploy AI "agents" or workflows" "that connect to the business email inboxes, scrape incoming data, read uploaded PDF" "remittance advices, or prompt human users to upload proof of payments to guess which" "invoice matches which bank line."
+            "The Flaw for High Volume: This model introduces massive SECURITY and LATENCY friction." "High-volume enterprises (like a telecom giant processing 500,000 billing rows a month)" "refuse to give a third-party startup broad API access to scrape their corporate email" "servers or read raw customer attachments due to extreme security risks. Furthermore," "scraping unstructured PDFs is SLOW, RESOURCE-HEAVY, and prone to HALLUCCINATIONS."
+            "2. The Waterfall API Approach: Pure Data Engineering (Zero Friction). Waterfall API" "treats unmatched payments as a pure data engineering problem. We don't read emails, we" "don't look at attachments, and we don't ask users to change their behavior.\n"
+            "- SUMMARY: Judges, the global reconciliation landscape is heavily bifurcated, and that is" "exactly where our opportunity lies. General ledger apps like Xero are designed for manual" "human bookkeeping rules retrospectively. Monoliths like HighRadius are locked behind" "multi-million-rand, slow-moving corporate ERP integration barriers. Gateways like" "Airwallex require merchants to leave their existing banks and move money onto closed-loop" "wallet networks."
+            "Waterfall API is an account-agnostic, developer-first Infrastructure Middleware Utility." "We do not move physical money, we do not read private emails like Lunos, and we do not" "force users to change their behavior. We sit directly behind existing enterprise bank" "feeds, executing deterministic, real-time dual-track substring matching inside transient" "memory within milliseconds."
+            "If anything, we compliment the existing ecosystem of enterprise reconciliation tools. We" "are not a competitor to Xero, HighRadius, or Tipalti; we are a complementary" "infrastructure utility that makes their downstream jobs easier and more efficient. We" "view Waterfall API as a piece to the puzzle, not a replacement for the entire puzzle."
+            "More importantly, our unit economics protect enterprise margins natively. While" "competitors penalize business growth by taking percentage cuts or charging massive locked" "annual software license fees, Waterfall API bills strictly on a tiered, flat step-down" "fee per successful match, scaling down to just R0.45 for our high-volume anchor accounts." "We deliver a FASTER, SAFER, POPIA-HARDENED DATA AUTOMATED SOLUTION at a FRACTION of the" "COST, MAKING MANUAL ACCOUNTING DESKS OBSOLETE."             
+            "Our system operates entirely as a machine-to-machine developer API gateway. The" "merchant's system pushes clean parameters (POST /verify) [B], and the bank pushes clean" "payload streams (POST /bank-feed). Our engine executes deterministic, high-speed fuzzy" "substring matching entirely in transient memory within millisecond.\n\n"
+    
             f"AUTHENTIC SYSTEM ARCHITECTURE & PRICING CONTEXT:\n{compiled_context}\n\n"
-            f"Judge or Potential Client Question: {user_query}"
-        )
+            f"Judge or Potential Client Question: {user_query}"""
+    )
+
 
 
         
