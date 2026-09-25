@@ -357,10 +357,12 @@ async def secure_routing_gateway_pipeline(request: Request, call_next):
 
     path = request.url.path
 
-    # 🚀 SECURITY EXEMPTION UPDATE: Add the banking upload endpoint path to your whitelist bypass parameters
-    if path.startswith("/pitch") or path.startswith("/api/v1/pitch") or path == "/api/v1/bank-feeds/mt940-upload":
-        print(f"🛡️ [FIREWALL BYPASS]: Granting clean route entry to endpoint path lane: {path}")
+    # 🚀 THE SYNTAX ALIGNMENT: Utilizing 'in' pattern matching for comprehensive route exemptions!
+    # This aligns perfectly with your primary webhook firewall architecture styling.
+    if "/pitch" in path or "/api/v1/pitch" in path or "/api/v1/bank-feeds/mt940-upload" in path:
+        print(f"🛡️ [FIREWALL BYPASS]: Granting clean route entry to whitelisted lane: {path}")
         return await call_next(request)
+
 
     
     # GUARD 1: Bank Webhook IP-Whitelisting
