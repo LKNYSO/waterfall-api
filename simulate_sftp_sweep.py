@@ -50,8 +50,9 @@ def execute_demanded_sftp_batch_sweep_test():
     for line in lines:
         if line.startswith(":61:") and "INV_" in line:
             # Substring partition lookup extraction logic
-            parts = line.split("INV_")
-            extracted_invoice_ref = "INV_" + parts[1].split("//")[0]
+            parts = line.split("INV_")[1]
+            raw_invoice_number = parts.split("//")[0]
+            extracted_invoice_ref = "INV_" + raw_invoice_number.strip()
             
     print(f"🎯 [TEST ENGINE]: Extracted Target Match Reference Key: '{extracted_invoice_ref}'")
     
