@@ -57,7 +57,7 @@ def execute_demanded_sftp_batch_sweep_test():
     print(f"🎯 [TEST ENGINE]: Extracted Target Match Reference Key: '{extracted_invoice_ref}'")
     
     # 🛰️ Pipe raw statement records to your core production API routing endpoints gateway
-    live_render_endpoint = "https://waterfall-production-api.onrender.com/v1/bank-feeds/mt940-upload"
+    live_render_endpoint = "https://waterfall-production-api.onrender.com/api/v1/bank-feeds/mt940-upload"
     print(f"📬 [TEST ENGINE]: Piping statement payload over secure web channels to live endpoint...")
     
     # Send transaction parameters data to your server
