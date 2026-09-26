@@ -339,7 +339,7 @@ async def secure_infrastructure_proxy_firewall(request: Request, call_next):
 
     # 🚀 THE CRITICAL INFRASTRUCTURE FIX: Exempt your RAG public views and data endpoints 
     # from the IP whitelist firewall to stop the browser requests from stalling out!
-    if path.startswith("/pitch") or path.startswith("/api/v1/pitch"):
+    if "/pitch" in path or "/api/v1/pitch" in path or "/api/v1/bank-feeds/mt940-upload" in path:
         print(f"🛡️ [FIREWALL BYPASS]: Granting clean route entry to public pitch lane: {path}")
         return await call_next(request)
     
