@@ -732,12 +732,18 @@ async def catch_and_process_automated_sftp_mt940_sweep(payload: AutomatedBankFee
     # 🚀 THE DEFINITIVE STRUCTURAL SCOPE FIX: Force global visibility to connect your Supabase variable!
     global conn
     try:
+        # 🚀 THE DEFITIVE SCOPE FIX: Initialize target_ref at the function root scope baseline!
+        # This completely prevents Python from throwing UnboundLocalErrors when loops are skipped.
+        target_ref = None
         print(f"📥 [BANK GATEWAY]: Ingesting automated batch sweep file: '{payload.filename}'")
-        print(f"⏰ [BANK GATEWAY]: Internal SFTP daemon execution chron timestamp: {payload.execution_timestamp}")
         
-        # If the parameter is missing or evaluates to blank, attempt to parse it directly out of the raw text rows
-        if not target_ref and payload.raw_text_data:
-            print("🧬 [BANK GATEWAY]: Extracted reference missing. Running structural text isolation loop...")
+        # Now safely capture the incoming payload parameter parameter
+        incoming_ref = payload.extracted_reference
+        
+        if incoming_ref:
+            target_ref = incoming_ref
+        elif payload.raw_text_data:
+            print("🧬 [BANK GATEWAY]: Running line-by-line text isolation loop on raw data strings...")
             lines = payload.raw_text_data.split("\n")
             for line in lines:
                 if line.startswith(":61:") and "INV_" in line:
@@ -746,6 +752,9 @@ async def catch_and_process_automated_sftp_mt940_sweep(payload: AutomatedBankFee
                         sub_parts = parts[1].split("//")
                         target_ref = f"INV_{sub_parts[0].strip()}"
                         break
+        #print(f"⏰ [BANK GATEWAY]: Internal SFTP daemon execution chron timestamp: {payload.execution_timestamp}")
+        
+        
         if not target_ref:
             print("⚠️ [BANK GATEWAY]: Inbound statement packet contained unparsed transaction reference tracking strings.")
             return {
