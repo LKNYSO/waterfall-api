@@ -376,7 +376,7 @@ async def secure_routing_gateway_pipeline(request: Request, call_next):
         )
         
     # GUARD 2: Inbound Ingestion Client Rate Limiting
-    if path == "/api/v1/payments/verify":
+    if "/api/v1/payments/verify" in path:
         auth_header = request.headers.get("Authorization")
         if auth_header and "Bearer " in auth_header:
             client_token = auth_header.split(" ")[1]
@@ -728,14 +728,24 @@ async def force_resolve_triage_match(payment_id: str, background_tasks: Backgrou
 # =======================================================================
 @app.post("/api/v1/bank-feeds/mt940-upload", status_code=status.HTTP_201_CREATED, tags=["Automated Core Bank Feeds"])
 async def catch_and_process_automated_sftp_mt940_sweep(payload: AutomatedBankFeedIngestSchema, response: Response):
-    """Ingests MT940 batch files from sftp_poller.py, parsing reference lines under strict POPIA controls."""
+    """Ingests MT940 batch files from simulate_sftp_sweep.py, parsing reference lines under strict POPIA controls."""
     # 🚀 THE DEFINITIVE STRUCTURAL SCOPE FIX: Force global visibility to connect your Supabase variable!
     global conn
     try:
         print(f"📥 [BANK GATEWAY]: Ingesting automated batch sweep file: '{payload.filename}'")
         print(f"⏰ [BANK GATEWAY]: Internal SFTP daemon execution chron timestamp: {payload.execution_timestamp}")
         
-        target_ref = payload.extracted_reference
+        # If the parameter is missing or evaluates to blank, attempt to parse it directly out of the raw text rows
+        if not target_ref and payload.raw_text_data:
+            print("🧬 [BANK GATEWAY]: Extracted reference missing. Running structural text isolation loop...")
+            lines = payload.raw_text_data.split("\n")
+            for line in lines:
+                if line.startswith(":61:") and "INV_" in line:
+                    parts = line.split("INV_")
+                    if len(parts) > 1:
+                        sub_parts = parts[1].split("//")
+                        target_ref = f"INV_{sub_parts[0].strip()}"
+                        break
         if not target_ref:
             print("⚠️ [BANK GATEWAY]: Inbound statement packet contained unparsed transaction reference tracking strings.")
             return {
@@ -756,6 +766,8 @@ async def catch_and_process_automated_sftp_mt940_sweep(payload: AutomatedBankFee
         # =======================================================================
         # Reuses your explicit IPv4 database pooler proxy configurations to write records securely on port 5432
         # Modify this insert execution loop block to match your exact Supabase ledger table architecture columns names!
+        
+        db_match_status = "MOCKED_PASSTHROUGH_SUCCESS"
         try:
             # Explicitly wrapping inside an internal try layout handles offline connection states defensively
             with conn.cursor() as db_cursor:
