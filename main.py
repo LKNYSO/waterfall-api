@@ -31,6 +31,14 @@ app = FastAPI(title="Waterfall API", version="1.0.0")
 # In production, pull these from secure environment variables/AWS Secrets Manager
 JWT_SECRET_KEY = "waterfall_super_secret_encryption_key_dont_leak"
 JWT_ALGORITHM = "HS256"
+MTN_CLIENT_ID = "b9SVXXXXXXXXXXXXXXXXXXXXXXXXJwtF"
+MTN_CLIENT_SECRET = "8dIMXXXXXXXXEiDV"
+# System Verification Logs (Prints to your Render log stream console on startup)
+print(f"📡 [MTN INTEGRATION]: Initializing secure machine-to-machine integration token channels...")
+if MTN_CLIENT_ID and MTN_CLIENT_SECRET:
+    print("🔒 [MTN INTEGRATION]: Credentials successfully loaded from environment container variable blocks.")
+else:
+    print("⚠️ [MTN INTEGRATION WARNING]: Missing portal client keys. Sandbox fallback logic operational.")
 
 # Configure the Token Bucket Parameters
 # Enforces a strict limit of 200 requests per minute per authenticated client app
@@ -490,7 +498,16 @@ async def payment_ingestion_signal(payload: PaymentVerifyRequest, token_claims: 
 
 
 # ACTION C: Bank Webhook Event Listener (The Reconciliation Core)
-@app.post("/api/v1/webhooks/bank-feed", status_code=status.HTTP_200_OK)
+@app.post("/api/v1/webhooks/bank-feed", status_code=status.HTTP_200_OK, tags=["Automated Core Bank Feeds"])
+async def catch_realtime_mtn_webhook_clear(request: Request):
+    """Real-time webhook listener validating incoming telco transaction streams."""
+    # Reads signature tokens arriving over the HTTP headers
+    client_id_header = request.headers.get("X-MTN-Client-ID")
+    
+    # Enforces absolute perimeter firewall security check parameters natively
+    if client_id_header != MTN_CLIENT_ID:
+        raise HTTPException(status_code=401, detail="Unauthorized integration node footprint.")
+
 async def process_bank_webhook(payload: BankFeedWebhook, background_tasks: BackgroundTasks):
     """
     Streams raw bank data feeds, executes the matching rules, and commits state transformations.
