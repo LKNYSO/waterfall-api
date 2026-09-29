@@ -18,7 +18,7 @@ import importlib
 from pinecone import Pinecone
 from psycopg2.extras import RealDictCursor
 from datetime import datetime, timedelta, timezone
-from typing import Optional
+from typing import Optional, dict, Any
 from fastapi import FastAPI, HTTPException, Header, status, Depends, Request, Response, BackgroundTasks
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field, UUID4
@@ -499,40 +499,196 @@ async def payment_ingestion_signal(payload: PaymentVerifyRequest, token_claims: 
 
 # ACTION C: Bank Webhook Event Listener (The Reconciliation Core)
 @app.post("/api/v1/webhooks/bank-feed", status_code=status.HTTP_200_OK, tags=["Automated Core Bank Feeds"])
-async def catch_realtime_mtn_webhook_clear(request: Request):
-    """Real-time webhook listener validating incoming telco transaction streams."""
-    # Reads signature tokens arriving over the HTTP headers
-    client_id_header = request.headers.get("X-MTN-Client-ID")
-    
-    # Enforces absolute perimeter firewall security check parameters natively
-    if client_id_header != MTN_CLIENT_ID:
-        raise HTTPException(status_code=401, detail="Unauthorized integration node footprint.")
+# async def catch_realtime_mtn_webhook_clear(
+#     payload: dict, # Accepts the flexible dynamic nested JSON payload structure layout
+#     x_mtn_client_id: str = Header(None, alias="X-MTN-Client-ID") # Extracts the authorization signature string from headers
+# ):
+#     """Intercepts instantaneous real-time EFT clearing events, scrubbing parameters in transient memory."""
+#     global conn
+#     try:
+#         # 🛡️ 1. Absolute Perimeter Security Validation Check
+#         # Reuses the variables securely injected via your Render Environment Panel
+#         if x_mtn_client_id != MTN_CLIENT_ID:
+#             print(f"🚨 SECURITY ALARM: Unauthorized webhook structural payload scan attempt from unrecognized node footprint.")
+#             raise HTTPException(status_code=401, detail="Unauthorized integration node authorization token.")
+            
+#         print("📡 [WEBHOOK]: Inbound real-time EFT transaction push notification successfully authenticated.")
 
-async def process_bank_webhook(payload: BankFeedWebhook, background_tasks: BackgroundTasks):
-    """
-    Streams raw bank data feeds, executes the matching rules, and commits state transformations.
-    """
+#         # 🚀 2. Extract the nested reference string path mapping dynamically from the incoming schema
+#         nested_payload = payload.get("payload", {})
+#         if nested_payload:
+#             # 📱 Shape A: Matches your MTN Client Demo schema nested parameters
+#             raw_reference = nested_payload.get("bank_reference_string")
+#             if not raw_reference:
+#                 raise HTTPException(status_code=422, detail="Missing mandatory transaction reference parameters.")
+#         else:
+#             # 🏦 Shape B: Matches your Collision Rail EFT schema flat parameters
+#             raw_reference = payload.get("raw_bank_description")
+#             if not raw_reference:
+#                 raise HTTPException(status_code=422, detail="Missing mandatory transaction reference parameters.")
+            
+#         print(f"🔍 [WEBHOOK]: Extracted raw payment reference track entry string: '{raw_reference}'")
+
+#         # 🚀 THE CRITICAL PARSING ENHANCEMENT: Isolate the clean invoice matching key prefix!
+#         # This strips away trailing billing data, transforming 'INV_90842/MTN-DATA-BUNDLE-RECON' -> 'INV_90842'
+
+#         target_ref = None
+#         if "INV" in raw_reference:
+#             #1. Split by 'INV' and select the right-hand array element string segment at index 1
+#             right_hand_side = raw_reference.split("INV_")[1]
+#             #2. Split by the trailing slash boundary parameter and pull out the left-hand index 0
+#             raw_invoice_number = right_hand_side.split("/")[0]
+#             #3. Formulate the clean, whitespace-stripped tracking key token
+#             target_ref = f"INV_{raw_invoice_number.strip()}"
+#         else:
+#             # Fallback to standard alphanumeric string stripping if the token signature varies
+#             target_ref = raw_reference.strip()
+
+#         print(f"🎯 [WEBHOOK]: Pre-reconciliation target match key isolated: '{target_ref}'")
+        
+#         # 🔒 3. POPIA Cryptographic Anonymization
+#         import hashlib
+#         secure_invoice_hash = hashlib.sha256(raw_reference.encode('utf-8')).hexdigest()[:12]
+        
+#         # =======================================================================
+#         # 🗄️ WRITE RECORD AUDIT STATE SECURELY TO SUPABASE POSTGRESQL (PORT 5432)
+#         # =======================================================================
+#         db_status = "PERSISTED_MOCKED_SUCCESS"
+#         try:
+#             with conn.cursor() as db_cursor:
+#                 db_cursor.execute(
+#                     """
+#                     INSERT INTO bank_reconciliation_feed_logs (filename, tracking_hash, status_state, created_at)
+#                     VALUES (%s, %s, %s, NOW())
+#                     ON CONFLICT DO NOTHING;
+#                     """,
+#                     (payload.get("event_id", "REALTIME_WEBHOOK"), secure_invoice_hash, "WEBHOOK_RECONCILED")
+#                 )
+#                 conn.commit()
+#             db_status = "PERSISTED_SUCCESSFULLY"
+#             print("💾 [DATABASE]: Real-time transaction footprint committed securely to Supabase disk storage array arrays.")
+#         except Exception as db_err:
+#             print(f"ℹ️ [DATABASE NOTE]: Connection running in sandbox pass-through fallback loop container. Details: {str(db_err)}")
+#             db_status = "SANDBOX_MOCK_SUCCESS"
+            
+#         return {
+#             "status": "WEBHOOK_PROCESSED",
+#             "message": "Real-time telco payment notification parsed and balanced successfully.",
+#             "extracted_match_token": target_ref,
+#             "popia_hash_signature": secure_invoice_hash,
+#             "database_sync": db_status
+#         }
+        
+#     except HTTPException as http_exc:
+#         raise http_exc
+#     except Exception as e:
+#         print(f"🚨 [WEBHOOK CRASH]: Internal processing thread failure: {str(e)}")
+#         raise HTTPException(status_code=500, detail=f"Internal proxy engine error: {str(e)}")
+
+async def process_bank_webhook(
+    payload: dict[str, Any], # Uses a flexible dictionary body to ingest multi-tenant schema formats
+    background_tasks: BackgroundTasks, # 💎 ENFORCE THIS ENTIRE EXACT ARGUMENT ROW!
+    x_mtn_client_id: Optional[str] = Header(None, alias="X-MTN-Client-ID")
+
+):
+    
+    """Universal Webhook Catchment Zone: Ingests variable payment schema payloads seamlessly."""
+    global conn
     conn = get_db_connection()
     cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)  # 🚀 Fixes the Tuple index crash!
     try:
+
+        # 🛡️ 1. Source Identification and Network Perimeter Authorization
+        is_mtn_traffic = x_mtn_client_id is not None
+
+        if is_mtn_traffic:
+            #Enforce validation checking against Render Environment Panel variables
+            if x_mtn_client_id != MTN_CLIENT_ID:
+                print("🚨 SECURITY ALARM: Unauthorized integration node authorization token mismatch.")
+                raise HTTPException(status_code=401, detail="Unauthorized integration node token.")
+            print("📡 [WEBHOOK]: Inbound MTN real-time MoMo clearing event successfully authenticated.")
+        else:
+            print("📡 [WEBHOOK]: Inbound Interbank Clearing Rail EFT event successfully intercepted.")
+        
+        # 🚀 2. Dynamic Structural Extraction & Triage Based on Schema Shape
+        # Check if the layout matches the nested MTN Client Demo schema shape
+        nested_payload = payload.get("payload", {})
+        
+        if is_mtn_traffic and nested_payload:
+            target_source = nested_payload
+            indx_ref_string = "bank_reference_string"
+            indx_amount_string = "amount_cents"
+
+        else:
+            target_source = payload
+            indx_ref_string = "raw_bank_description"
+            indx_amount_string = "amount_received"
+
+            
+        # Target the standard interbank collision rail data fields natively
+        raw_reference = target_source.get(indx_ref_string)
+        transaction_cents = target_source.get(indx_amount_string) # Pulls the appropriate amount field for standard interbank schemas
+        print(f"💰 [INTERBANK DISPATCH]: Processing transaction value footprint: {transaction_cents} Cents.")
+
+        if not raw_reference:
+            raise HTTPException(status_code=422, detail="Missing mandatory transaction reference tracking metrics.")
+
+        print(f"🔍 [WEBHOOK]: Extracted raw payment reference track entry string: '{raw_reference}'")
+
+        # 🚀 3. THE DEFINITIVE WEBHOOK PARSING LOOP: Isolate the clean invoice match token prefix!
+        # This turns 'INV_90842/MTN-DATA-BUNDLE-RECON' into 'INV_90842' elegantly inside volatile RAM
+        target_ref = None
+        if "INV" in raw_reference:
+            # First split by 'INV_' to grab the segment at index 1
+            right_hand_side = raw_reference.split("INV_")[1]
+            # Second split by 'INV_' to grab the segment 
+            raw_invoice_number = right_hand_side.split("/")[0]
+            target_ref = f"INV_{raw_invoice_number.strip()}"
+        else:
+            target_ref = raw_reference.strip()
+        
+        print(f"🎯 [WEBHOOK]: Pre-reconciliation target match key isolated: '{target_ref}'")
+
+        # 🔒 4. POPIA Cryptographic Anonymization
+        import hashlib
+        secure_invoice_hash = hashlib.sha256(target_ref.encode('utf-8')).hexdigest()[:12]
+
         cursor.execute(
             "SELECT id, invoice_id, expected_reference FROM customer_payments WHERE status IN ('AWAITING_VERIFICATION', 'PROCESSING_BATCH') AND amount = %s;",
-            (payload.amount_received,)
+                    (target_source.get(indx_amount_string),)
         )
         candidates = cursor.fetchall()
-
         if not candidates:
-            return {"match_status": "IGNORED", "reason": "No active open invoices match this transaction amount balance value"}
-
+            return {"match_status": "IGNORED", "reason": "No active open invoices match this transaction amount balance value"}    
+        
         matched_records = []
-        raw_desc_upper = payload.raw_bank_description.upper()
+        if raw_reference:
+            raw_desc_upper = raw_reference.upper()
+        else:
+            raw_desc_upper = ""
+            print(f"raw_reference: {raw_desc_upper}.")
+            print("⚠️ [MATCH ENGINE]: Warning - Inbound raw reference text row is completely empty.")
 
+        
         for rec in candidates:
-            expected_ref_upper = rec["expected_reference"].upper()
+            # 1. Clean and evaluate your open ledger reference keys from Supabase/ERP
+            expected_ref_raw = str(rec.get(indx_ref_string, ""))
+            expected_ref_upper = expected_ref_raw.upper()
+
+            # 2. Extract pure numeric digits out of the expected reference key (e.g., 'INV_90842' -> '90842')
+            # This handles instances where citizens leave off string tags completely
+            numeric_digits_only = "".join(filter(str.isdigit, expected_ref_upper))
+
+            # 3. Formulate an adaptive 8-character truncation window token for loose matching filters
             truncated_ref_upper = expected_ref_upper[:8]
 
-            # Primary validation: verify string inclusion gate matches
-            if expected_ref_upper in raw_desc_upper or truncated_ref_upper in raw_desc_upper:
+            # 🎯 THE ULTIMATE THREE-TIER INCLUSION GATE:
+            # Checks for absolute string inclusion, truncated parameters, or pure billing digit matches
+            if (expected_ref_upper in raw_desc_upper) or \
+               (truncated_ref_upper in raw_desc_upper and len(truncated_ref_upper) > 3) or \
+               (numeric_digits_only in raw_desc_upper and len(numeric_digits_only) > 3):
+                
+                print(f"🎯 [MATCHED]: Flawless ledger allocation loop match found for: '{expected_ref_upper}'")
                 matched_records.append(rec)
 
         # 🚀 EXTRA COLLISION PROTOCOL LAYER: Best Fit Length Priority Check
@@ -543,7 +699,7 @@ async def process_bank_webhook(payload: BankFeedWebhook, background_tasks: Backg
             # and sort them by the length of the expected reference in descending order
             exact_substring_matches = []
             for rec in matched_records:
-                if rec["expected_reference"].upper() in raw_desc_upper:
+                if rec[indx_ref_string].upper() in raw_desc_upper:
                     exact_substring_matches.append(rec)
             
             if exact_substring_matches:
@@ -570,9 +726,12 @@ async def process_bank_webhook(payload: BankFeedWebhook, background_tasks: Backg
 
         if len(matched_records) == 1:
             target = matched_records[0]
-        
+
+            # 🛡️ FIX DATA ACCESS PROPERTIES: Extract variables safely from your dynamic multi-tenant dict
+            raw_bank_desc_clean = raw_reference if raw_reference else "EFT TRANSFER / MASKED_METADATA_UNPARSABLE"
+
             # ACTIVATE FILTER: Clean the bank feed metadata inside transient memory before disk write
-            cleaned_bank_string = anonymise_raw_bank_metadata(payload.raw_bank_description)
+            cleaned_bank_string = anonymise_raw_bank_metadata(raw_bank_desc_clean)
         
             update_sql = """
                 UPDATE customer_payments 
@@ -580,6 +739,7 @@ async def process_bank_webhook(payload: BankFeedWebhook, background_tasks: Backg
                     bank_transaction_id = %s, 
                     clearing_rail_used = %s, 
                     actual_reference_received = %s, -- Safely writes masked metadata only
+                    tracking_hash = %s,
                     matched_at = %s, 
                     updated_at = %s
                 WHERE id = %s;
@@ -588,17 +748,20 @@ async def process_bank_webhook(payload: BankFeedWebhook, background_tasks: Backg
                 payload.bank_transaction_id, 
                 payload.clearing_rail, 
                 cleaned_bank_string,            # Injects the POPIA-compliant string value
-                datetime.now(timezone.utc), 
-                datetime.now(timezone.utc), 
+                secure_invoice_hash,            # 💎 PASSED AS SECURE 12-CHARACTER FOOTPRINT
+                datetime.now(timezone.utc),
+                datetime.now(timezone.utc),
                 target["id"]
             ))
             conn.commit()
+            
             # 🚀 ASYNC TRIGGER: Offload the retry logic to background threads immediately
             merchant_callback_url = "https://merchant-crm-domain-placeholder.co.za"
             webhook_payload = {
                 "event": "payment.completed",
                 "invoice_id": target["invoice_id"],
-                "reconciled_at": datetime.now(timezone.utc).isoformat()
+                "reconciled_at": datetime.now(timezone.utc).isoformat(),
+                "popia_audit_token": secure_invoice_hash # Pass anonymized tracking code to client callbacks
             }
         
             # Hand off task execution instantly to free up your server to process the next incoming payment
@@ -606,8 +769,8 @@ async def process_bank_webhook(payload: BankFeedWebhook, background_tasks: Backg
 
             # 🚀 VISUAL PITCH DEMO AID: Print logs forcefully onto your terminal console display
             print(f"\n🔒 [POPIA SECURITY] Intercepting bank feed payload... Scrubbing depositor name in memory.")
-            print(f"   Original Description: {payload.raw_bank_description}")
-            print(f"   Committed Database String: EFT INTERBANK /FRM: MASKED_{hashlib.sha256(b'J SMITH').hexdigest()[:12]} /REF: {target['invoice_id']}")
+            print(f"   Original Description: {raw_bank_desc_clean}")
+            print(f"   Committed Database String: EFT INTERBANK /FRM: MASKED_{secure_invoice_hash} /REF: {target['invoice_id']}")
             
             return {"match_status": "SUCCESS", "reconciled_invoice": target["invoice_id"], "new_state": "COMPLETED"}
             
