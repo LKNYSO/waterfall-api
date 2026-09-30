@@ -356,7 +356,7 @@ async def secure_routing_gateway_pipeline(request: Request, call_next):
     Consolidated Week 2 Security Stack. Cascades requests through:
     1. IP Whitelisting (Webhooks) -> 2. Rate Limiting Throttling (Ingestion API)
     """
-     path = request.url.path
+    path = request.url.path
     
     # 💎 THE DEFINITIVE INTEGRATION RECONCILIATION GATE
     # Exempt real-time webhook lanes completely from rate-limiting/cascading security drops
