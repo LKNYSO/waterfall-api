@@ -376,7 +376,7 @@ async def secure_routing_gateway_pipeline(request: Request, call_next):
     # This aligns perfectly with your primary webhook firewall architecture styling.
     if path == "/" or "/pitch" in path or "/api/v1/pitch" in path or "/api/v1/bank-feeds/mt940-upload" in path or "/api/v1/webhooks/bank-feed" in path:
         print(f"🛡️ [FIREWALL BYPASS]: Granting clean route entry to whitelisted lane: {path}")
-        return await call_next(request)
+        return await call_next(request) 
 
 
     
