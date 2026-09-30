@@ -1,8 +1,33 @@
 $kind: http-request
 description: ""
-url: "{{base_url}}/api/v1/bank-feeds/mt940-upload"
+url: "{{base_url}}/api/v1/webhooks/bank-feed"
 method: POST
+headers:
+  Content-Type: application/json
+  X-MTN-Client-ID: b9SVXXXXXXXXXXXXXXXXXXXXXXXXJwtF
 body:
   type: json
-  content: ""
+  content: "{\r
+
+    \    \"event_id\": \"7569365061\",\r
+
+    \    \"event_type\": \"momo.payment.cleared_incoming\",\r
+
+    \    \"payload\": {\r
+
+    \        \"clearing_channel\": \"MTN MoMo Gateway South Africa\",\r
+
+    \        \"amount_cents\": 1000,\r
+
+    \        \"currency\": \"ZAR\",\r
+
+    \        \"bank_reference_string\": \" \",\r
+
+    \        \"account_suffix\": \"******5543\",\r
+
+    \        \"value_date\": \"2026-09-28T17:15:00Z\"\r
+
+    \    }\r
+
+    }\r\n"
 order: 4503492589413019
