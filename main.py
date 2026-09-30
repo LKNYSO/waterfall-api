@@ -18,7 +18,7 @@ import importlib
 from pinecone import Pinecone
 from psycopg2.extras import RealDictCursor
 from datetime import datetime, timedelta, timezone
-from typing import Optional, dict, Any
+from typing import Optional, Dict, Any
 from fastapi import FastAPI, HTTPException, Header, status, Depends, Request, Response, BackgroundTasks
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field, UUID4
