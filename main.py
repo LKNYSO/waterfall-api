@@ -504,6 +504,7 @@ async def payment_ingestion_signal(payload: PaymentVerifyRequest, token_claims: 
         conn.close()
 
 
+@app.post("/") #💎 CATCHES REAL-WORLD MTN NETWORK ROOT PAYLOADS NATIVELY!
 # ACTION C: Bank Webhook Event Listener (The Reconciliation Core)
 @app.post("/api/v1/webhooks/bank-feed", status_code=status.HTTP_200_OK, tags=["Automated Core Bank Feeds"])
 # async def catch_realtime_mtn_webhook_clear(
