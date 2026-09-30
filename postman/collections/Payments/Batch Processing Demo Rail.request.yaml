@@ -1,0 +1,18 @@
+$kind: http-request
+description: ""
+url: "{{base_url}}/api/v1/bank-feeds/mt940-upload"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"filename\": \"STMT_MUNICIPALITY_20260926_001.TXT\",\r
+
+    \    \"raw_text_data\": \":20:START_OF_RECON_RECORD_20260926\\n:25:ZA_STANDARD_BANK_LEDGER_ACCOUNT_9087654321\\n:28C:00115\\n:60F:C260926ZAR750000,00\\n:61:2609260926CR25000,00NTRFREF_INV_90842//WATERFALL_RECON\\n:86:CR/REF/INV_90842/MEMO/MUNICIPAL_RATES_CLEAR_LUKANYISO_BRKWE\\n:62F:C260926ZAR775000,00\",\r
+
+    \    \"extracted_reference\": \"INV_90842\",\r
+
+    \    \"execution_timestamp\": 1787834517.0\r
+
+    }\r\n"
+order: 4503447140535937

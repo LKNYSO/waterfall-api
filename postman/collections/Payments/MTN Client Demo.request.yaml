@@ -1,0 +1,8 @@
+$kind: http-request
+description: ""
+url: "{{base_url}}/api/v1/bank-feeds/mt940-upload"
+method: POST
+body:
+  type: json
+  content: ""
+order: 4503492589413019
