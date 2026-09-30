@@ -356,6 +356,12 @@ async def secure_routing_gateway_pipeline(request: Request, call_next):
     Consolidated Week 2 Security Stack. Cascades requests through:
     1. IP Whitelisting (Webhooks) -> 2. Rate Limiting Throttling (Ingestion API)
     """
+     path = request.url.path
+    
+    # 💎 THE DEFINITIVE INTEGRATION RECONCILIATION GATE
+    # Exempt real-time webhook lanes completely from rate-limiting/cascading security drops
+    if "/api/v1/webhooks/bank-feed" in path or "/api/v1/bank-feeds/mt940-upload" in path or "/pitch" in path:
+        return await call_next(request)
         # 🛡️ Proxy-Aware Extraction: Check the load balancer header first, fall back to direct socket
     x_forwarded_for = request.headers.get("X-Forwarded-For")
     if x_forwarded_for:
