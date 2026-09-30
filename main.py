@@ -653,6 +653,29 @@ async def process_bank_webhook(
         import hashlib
         secure_invoice_hash = hashlib.sha256(target_ref.encode('utf-8')).hexdigest()[:12]
 
+        # 🚀 THE AUDIT GUARD STEP: Extract the unique payment rail identifier dynamically
+        unique_tx_id = payload.get("event_id", payload.get("bank_transaction_id"))
+
+        if not unique_tx_id:
+            unique_tx_id = f"MOCK_HASH_{secure_invoice_hash}"
+
+        print(f"🛡️ [AUDIT GUARD]: Checking database for existing tracking key registration: '{unique_tx_id}'")
+
+        with conn.cursor() as validation_cursor:
+            validation_cursor.execute(
+                "SELECT id FROM bank_reconciliation_feed_logs WHERE filename = %s LIMIT 1;",
+                (unique_tx_id,)
+            )
+
+            if validation_cursor.fetchone():
+                print(f"🚨 [CONFLICT RETRY]: Intercepted a double-processing attempt! Tx ID '{unique_tx_id}' has already been balanced.")
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=f"Conflict: Transaction identifier '{unique_tx_id}' has already been processed and reconciled."
+                )
+
+        print("✅ [AUDIT GUARD]: Unique verification confirmed. Proceeding cleanly down matching pipeline lanes.")
+
         cursor.execute(
             "SELECT id, invoice_id, expected_reference FROM customer_payments WHERE status IN ('AWAITING_VERIFICATION', 'PROCESSING_BATCH') AND amount = %s;",
                     (target_source.get(indx_amount_string),)
@@ -745,14 +768,22 @@ async def process_bank_webhook(
                 WHERE id = %s;
             """
             cursor.execute(update_sql, (
-                payload.bank_transaction_id, 
-                payload.clearing_rail, 
+                payload.get("bank_transaction_id"),
+                payload.get("clearing_rail"),
                 cleaned_bank_string,            # Injects the POPIA-compliant string value
                 secure_invoice_hash,            # 💎 PASSED AS SECURE 12-CHARACTER FOOTPRINT
                 datetime.now(timezone.utc),
                 datetime.now(timezone.utc),
                 target["id"]
             ))
+            cursor.execute(
+                """
+                INSERT INTO bank_reconciliation_feed_logs (filename, tracking_hash, status_state, created_at)
+                VALUES (%s, %s, %s, NOW())
+                ON CONFLICT DO NOTHING;
+                """,
+                (unique_tx_id, secure_invoice_hash, "WEBHOOK_RECONCILED")
+            )
             conn.commit()
             
             # 🚀 ASYNC TRIGGER: Offload the retry logic to background threads immediately
@@ -780,6 +811,9 @@ async def process_bank_webhook(
             print(f"⚡ [ASYNC TASK] Database tracking rows locked to COMPLETED. Handing off outbound event worker hook.")
 
         return {"match_status": "IGNORED", "reason": "Amount matches open records, but text reference signatures do not align"}
+    except HTTPException:
+        conn.rollback()
+        raise
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=500, detail=f"Engine runtime error: {str(e)}")
@@ -989,4 +1023,3 @@ async def catch_and_process_automated_sftp_mt940_sweep(payload: AutomatedBankFee
             "status": "INFRASTRUCTURE_CRASH_500",
             "detail": f"Internal banking middleware execution error: {str(general_endpoint_exception)}"
         }
-
