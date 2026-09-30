@@ -347,7 +347,7 @@ async def secure_infrastructure_proxy_firewall(request: Request, call_next):
 
     # 🚀 THE CRITICAL INFRASTRUCTURE FIX: Exempt your RAG public views and data endpoints 
     # from the IP whitelist firewall to stop the browser requests from stalling out!
-    if "/pitch" in path or "/api/v1/pitch" in path or "/api/v1/bank-feeds/mt940-upload" in path:
+    if "/pitch" in path or "/api/v1/pitch" in path or "/api/v1/bank-feeds/mt940-upload" in path or "/api/v1/webhooks/bank-feed" in path:
         print(f"🛡️ [FIREWALL BYPASS]: Granting clean route entry to public pitch lane: {path}")
         return await call_next(request)
     
@@ -367,7 +367,7 @@ async def secure_routing_gateway_pipeline(request: Request, call_next):
 
     # 🚀 THE SYNTAX ALIGNMENT: Utilizing 'in' pattern matching for comprehensive route exemptions!
     # This aligns perfectly with your primary webhook firewall architecture styling.
-    if "/pitch" in path or "/api/v1/pitch" in path or "/api/v1/bank-feeds/mt940-upload" in path:
+    if "/pitch" in path or "/api/v1/pitch" in path or "/api/v1/bank-feeds/mt940-upload" in path or "/api/v1/webhooks/bank-feed" in path:
         print(f"🛡️ [FIREWALL BYPASS]: Granting clean route entry to whitelisted lane: {path}")
         return await call_next(request)
 
