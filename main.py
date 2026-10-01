@@ -31,8 +31,8 @@ app = FastAPI(title="Waterfall API", version="1.0.0")
 # In production, pull these from secure environment variables/AWS Secrets Manager
 JWT_SECRET_KEY = "waterfall_super_secret_encryption_key_dont_leak"
 JWT_ALGORITHM = "HS256"
-MTN_CLIENT_ID = "b9SVXXXXXXXXXXXXXXXXXXXXXXXXJwtF"
-MTN_CLIENT_SECRET = "8dIMXXXXXXXXEiDV"
+MTN_CLIENT_ID = "b9SVQQlgtGFINar3DVxmbuT2N1HGJwtF"
+MTN_CLIENT_SECRET = "8dIMCzeWGSFLEiDV"
 # System Verification Logs (Prints to your Render log stream console on startup)
 print(f"📡 [MTN INTEGRATION]: Initializing secure machine-to-machine integration token channels...")
 if MTN_CLIENT_ID and MTN_CLIENT_SECRET:
