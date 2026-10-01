@@ -505,7 +505,6 @@ async def payment_ingestion_signal(payload: PaymentVerifyRequest, token_claims: 
 
 
 @app.post("/") #💎 CATCHES REAL-WORLD MTN NETWORK ROOT PAYLOADS NATIVELY!
-# ACTION C: Bank Webhook Event Listener (The Reconciliation Core)
 @app.post("/api/v1/webhooks/bank-feed", status_code=status.HTTP_200_OK, tags=["Automated Core Bank Feeds"])
 # async def catch_realtime_mtn_webhook_clear(
 #     payload: dict, # Accepts the flexible dynamic nested JSON payload structure layout
@@ -603,238 +602,247 @@ async def process_bank_webhook(
     """Universal Webhook Catchment Zone: Ingests variable payment schema payloads seamlessly."""
     global conn
     conn = get_db_connection()
-    cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)  # 🚀 Fixes the Tuple index crash!
+    # cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)  # 🚀 Fixes the Tuple index crash!
     try:
+        # 🛡️ THE DEFINITIVE CONTEXT MANAGER UNIFICATION GATES:
+        # Enforce RealDictCursor natively inside the context block wrapper 
+        # to guarantee safe, automated connection pool flushes on exit!
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+            # 🛡️ 1. Source Identification and Network Perimeter Authorization
+            is_mtn_traffic = x_mtn_client_id is not None
 
-        # 🛡️ 1. Source Identification and Network Perimeter Authorization
-        is_mtn_traffic = x_mtn_client_id is not None
-
-        if is_mtn_traffic:
-            #Enforce validation checking against Render Environment Panel variables
-            if x_mtn_client_id != MTN_CLIENT_ID:
-                print("🚨 SECURITY ALARM: Unauthorized integration node authorization token mismatch.")
-                raise HTTPException(status_code=401, detail="Unauthorized integration node token.")
-            print("📡 [WEBHOOK]: Inbound MTN real-time MoMo clearing event successfully authenticated.")
-        else:
-            print("📡 [WEBHOOK]: Inbound Interbank Clearing Rail EFT event successfully intercepted.")
+            if is_mtn_traffic:
+                #Enforce validation checking against Render Environment Panel variables
+                if x_mtn_client_id != MTN_CLIENT_ID:
+                    print("🚨 SECURITY ALARM: Unauthorized integration node authorization token mismatch.")
+                    raise HTTPException(status_code=401, detail="Unauthorized integration node token.")
+                print("📡 [WEBHOOK]: Inbound MTN real-time MoMo clearing event successfully authenticated.")
+            else:
+                print("📡 [WEBHOOK]: Inbound Interbank Clearing Rail EFT event successfully intercepted.")
         
-        # 🚀 2. Dynamic Structural Extraction & Triage Based on Schema Shape
-        # Check if the layout matches the nested MTN Client Demo schema shape
-        nested_payload = payload.get("payload", {})
-        
-        if is_mtn_traffic and nested_payload:
-            target_source = nested_payload
-            indx_ref_string = "bank_reference_string"
-            indx_amount_string = "amount_cents"
+            # 🚀 2. Dynamic Structural Extraction & Triage Based on Schema Shape
+            # Check if the layout matches the nested MTN Client Demo schema shape
+            nested_payload = payload.get("payload", {})
+            
+            if is_mtn_traffic and nested_payload:
+                target_source = nested_payload
+                indx_ref_string = "bank_reference_string"
+                indx_amount_string = "amount_cents"
 
-        else:
-            target_source = payload
-            indx_ref_string = "raw_bank_description"
-            indx_amount_string = "amount_received"
+            else:
+                target_source = payload
+                indx_ref_string = "raw_bank_description"
+                indx_amount_string = "amount_received"
 
             
-        # Target the standard interbank collision rail data fields natively
-        raw_reference = target_source.get(indx_ref_string)
-        transaction_cents = target_source.get(indx_amount_string) # Pulls the appropriate amount field for standard interbank schemas
-        print(f"💰 [INTERBANK DISPATCH]: Processing transaction value footprint: {transaction_cents} Cents.")
+            # Target the standard interbank collision rail data fields natively
+            raw_reference = target_source.get(indx_ref_string)
+            transaction_cents = target_source.get(indx_amount_string) # Pulls the appropriate amount field for standard interbank schemas
+            print(f"💰 [INTERBANK DISPATCH]: Processing transaction value footprint: {transaction_cents} Cents.")
 
-        if not raw_reference:
-            raise HTTPException(status_code=422, detail="Missing mandatory transaction reference tracking metrics.")
+            if not raw_reference:
+                raise HTTPException(status_code=422, detail="Missing mandatory transaction reference tracking metrics.")
 
-        print(f"🔍 [WEBHOOK]: Extracted raw payment reference track entry string: '{raw_reference}'")
+            print(f"🔍 [WEBHOOK]: Extracted raw payment reference track entry string: '{raw_reference}'")
 
-        # 🚀 3. THE DEFINITIVE WEBHOOK PARSING LOOP: Isolate the clean invoice match token prefix!
-        # This turns 'INV_90842/MTN-DATA-BUNDLE-RECON' into 'INV_90842' elegantly inside volatile RAM
-        target_ref = None
-        if "INV" in raw_reference:
-            # First split by 'INV_' to grab the segment at index 1
-            right_hand_side = raw_reference.split("INV_")[1]
-            # Second split by 'INV_' to grab the segment 
-            raw_invoice_number = right_hand_side.split("/")[0]
-            target_ref = f"INV_{raw_invoice_number.strip()}"
-        else:
-            target_ref = raw_reference.strip()
-        
-        print(f"🎯 [WEBHOOK]: Pre-reconciliation target match key isolated: '{target_ref}'")
+            # 🚀 3. THE DEFINITIVE WEBHOOK PARSING LOOP: Isolate the clean invoice match token prefix!
+            # This turns 'INV_90842/MTN-DATA-BUNDLE-RECON' into 'INV_90842' elegantly inside volatile RAM
+            target_ref = None
+            if "INV" in raw_reference:
+                # First split by 'INV_' to grab the segment at index 1
+                right_hand_side = raw_reference.split("INV_")[1]
+                # Second split by 'INV_' to grab the segment 
+                raw_invoice_number = right_hand_side.split("/")[0]
+                target_ref = f"INV_{raw_invoice_number.strip()}"
+            else:
+                target_ref = raw_reference.strip()
+            
+            print(f"🎯 [WEBHOOK]: Pre-reconciliation target match key isolated: '{target_ref}'")
 
-        # 🔒 4. POPIA Cryptographic Anonymization
-        import hashlib
-        secure_invoice_hash = hashlib.sha256(target_ref.encode('utf-8')).hexdigest()[:12]
+            # 🔒 4. POPIA Cryptographic Anonymization
+            import hashlib
+            secure_invoice_hash = hashlib.sha256(target_ref.encode('utf-8')).hexdigest()[:12]
 
-        # 🚀 THE AUDIT GUARD STEP: Extract the unique payment rail identifier dynamically
-        # 🚀 STEP 1: EXTRACT THE UNIQUE INTEGRATION PAYMENT IDENTIFIER
-        unique_tx_id = payload.get("event_id", payload.get("bank_transaction_id"))
+            # 🚀 THE AUDIT GUARD STEP: Extract the unique payment rail identifier dynamically
+            # 🚀 STEP 1: EXTRACT THE UNIQUE INTEGRATION PAYMENT IDENTIFIER
+            unique_tx_id = payload.get("event_id", payload.get("bank_transaction_id"))
 
-        # 🥷 NINJA RE-ROUTING FALLBACK GATEWAY:
-        # If the consumer application failed to pass a reference text string,
-        # we dynamically capture the network Transaction ID to bypass the bottleneck!
-        # 💎 THE LIVE PIVOT: If the app reference text is empty, fall back directly to the network Transaction ID!
-        if not raw_reference and unique_tx_id:
-            print(f"🥷 [NINJA FALLBACK]: Empty app reference detected. Re-routing match string parameter using network Transaction ID: '{unique_tx_id}'")
-            raw_reference = f"INV_90842/MOMO-{unique_tx_id}" # Natively hooks the string to your seeded table record rows!
+            # 🥷 NINJA RE-ROUTING FALLBACK GATEWAY:
+            # If the consumer application failed to pass a reference text string,
+            # we dynamically capture the network Transaction ID to bypass the bottleneck!
+            # 💎 THE LIVE PIVOT: If the app reference text is empty, fall back directly to the network Transaction ID!
+            if not raw_reference and unique_tx_id:
+                print(f"🥷 [NINJA FALLBACK]: Empty app reference detected. Re-routing match string parameter using network Transaction ID: '{unique_tx_id}'")
+                raw_reference = f"INV_90842/MOMO-{unique_tx_id}" # Natively hooks the string to your seeded table record rows!
 
-        # 🛡️ STEP 2: THE PERMANENT DOUBLE-PROCESSING AUDIT GUARD
-        # Standardize an isolated placeholder string value if BOTH parameters arrive completely empty
-        if not unique_tx_id:
-            # Hash the raw payload structure length to make a clean, safe, context-independent token footprint key
-            import random
-            unique_tx_id = f"MOCK_HASH_{random.randint(100000, 999999)}" # Generates a random 6-digit mock hash to avoid null collisions
-            print(f"⚠️ [MOCK HASH]: Both reference and transaction ID are empty. Using a temporary mock hash: '{unique_tx_id}'")
+            # 🛡️ STEP 2: THE PERMANENT DOUBLE-PROCESSING AUDIT GUARD
+            # Standardize an isolated placeholder string value if BOTH parameters arrive completely empty
+            if not unique_tx_id:
+                # Hash the raw payload structure length to make a clean, safe, context-independent token footprint key
+                import random
+                unique_tx_id = f"MOCK_HASH_{random.randint(100000, 999999)}" # Generates a random 6-digit mock hash to avoid null collisions
+                print(f"⚠️ [MOCK HASH]: Both reference and transaction ID are empty. Using a temporary mock hash: '{unique_tx_id}'")
 
-        print(f"🛡️ [AUDIT GUARD]: Checking database for existing tracking key registration: '{unique_tx_id}'")
+            print(f"🛡️ [AUDIT GUARD]: Checking database for existing tracking key registration: '{unique_tx_id}'")
 
-         # Open a high-performance verification cursor directly on my Supabase PostgreSQL connector
-        with conn.cursor() as validation_cursor:
-            validation_cursor.execute(
+            cursor.execute(
                 "SELECT id FROM bank_reconciliation_feed_logs WHERE filename = %s LIMIT 1;",
                 (unique_tx_id,)
             )
 
              # .fetchone() retrieves exactly one row or returns None, protecting your 50MB RAM ceiling
-            if validation_cursor.fetchone():
+            if cursor.fetchone():
                 print(f"🚨 [CONFLICT RETRY]: Intercepted a double-processing attempt! Tx ID '{unique_tx_id}' has already been balanced.")
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
                     detail=f"Conflict: Transaction identifier '{unique_tx_id}' has already been processed and reconciled."
                 )
 
-        print("✅ [AUDIT GUARD]: Unique verification confirmed. Proceeding cleanly down matching pipeline lanes.")
+            print("✅ [AUDIT GUARD]: Unique verification confirmed. Proceeding cleanly down matching pipeline lanes.")
 
-        cursor.execute(
-            "SELECT id, invoice_id, expected_reference FROM customer_payments WHERE status IN ('AWAITING_VERIFICATION', 'PROCESSING_BATCH') AND amount = %s;",
-                    (target_source.get(indx_amount_string),)
-        )
-        candidates = cursor.fetchall()
-        if not candidates:
-            return {"match_status": "IGNORED", "reason": "No active open invoices match this transaction amount balance value"}    
-        
-        matched_records = []
-        if raw_reference:
-            raw_desc_upper = raw_reference.upper()
-        else:
-            raw_desc_upper = ""
-            print(f"raw_reference: {raw_desc_upper}.")
-            print("⚠️ [MATCH ENGINE]: Warning - Inbound raw reference text row is completely empty.")
-
-        
-        for rec in candidates:
-            # 1. Clean and evaluate your open ledger reference keys from Supabase/ERP
-            expected_ref_raw = str(rec.get(indx_ref_string, ""))
-            expected_ref_upper = expected_ref_raw.upper()
-
-            # 2. Extract pure numeric digits out of the expected reference key (e.g., 'INV_90842' -> '90842')
-            # This handles instances where citizens leave off string tags completely
-            numeric_digits_only = "".join(filter(str.isdigit, expected_ref_upper))
-
-            # 3. Formulate an adaptive 8-character truncation window token for loose matching filters
-            truncated_ref_upper = expected_ref_upper[:8]
-
-            # 🎯 THE ULTIMATE THREE-TIER INCLUSION GATE:
-            # Checks for absolute string inclusion, truncated parameters, or pure billing digit matches
-            if (expected_ref_upper in raw_desc_upper) or \
-               (truncated_ref_upper in raw_desc_upper and len(truncated_ref_upper) > 3) or \
-               (numeric_digits_only in raw_desc_upper and len(numeric_digits_only) > 3):
-                
-                print(f"🎯 [MATCHED]: Flawless ledger allocation loop match found for: '{expected_ref_upper}'")
-                matched_records.append(rec)
-
-        # 🚀 EXTRA COLLISION PROTOCOL LAYER: Best Fit Length Priority Check
-        if len(matched_records) > 1:
-            print(f"⚠️ [COLLISION PROTOCOL] Multi-match candidates detected ({len(matched_records)}). Evaluating Best Fit priority layer...")
-            
-            # Group records by whether their exact reference appears in the description
-            # and sort them by the length of the expected reference in descending order
-            exact_substring_matches = []
-            for rec in matched_records:
-                if rec[indx_ref_string].upper() in raw_desc_upper:
-                    exact_substring_matches.append(rec)
-            
-            if exact_substring_matches:
-                # Sort descending by string character size length
-                exact_substring_matches.sort(key=lambda x: len(x["expected_reference"]), reverse=True)
-                
-                longest_match_len = len(exact_substring_matches[0]["expected_reference"])
-                # Filter down to only those items sharing the maximum length alignment value
-                top_tier_fits = [r for r in exact_substring_matches if len(r["expected_reference"]) == longest_match_len]
-                
-                # If a single candidate fits better than the shorter substrings, override and resolve the collision!
-                if len(top_tier_fits) == 1:
-                    print(f"🎯 [COLLISION PROTOCOL] Resolution secured! '{top_tier_fits[0]['invoice_id']}' selected via Longest String Match rule.")
-                    matched_records = top_tier_fits
-
-        if len(matched_records) > 1:
-            collision_ids = [rec["id"] for rec in matched_records]
             cursor.execute(
-                "UPDATE customer_payments SET status = 'AWAITING_VERIFICATION', updated_at = %s WHERE id IN %s;",
-                (datetime.now(timezone.utc), tuple(collision_ids))
+                "SELECT id, invoice_id, expected_reference FROM customer_payments WHERE status IN ('AWAITING_VERIFICATION', 'PROCESSING_BATCH') AND amount = %s;",
+                        (transaction_cents,)
             )
-            conn.commit()
-            return {"match_status": "EXCEPTION_LOGGED", "reason": "Data collision detected. Isolated for manual review dashboard."}
-
-        if len(matched_records) == 1:
-            target = matched_records[0]
-
-            # 🛡️ FIX DATA ACCESS PROPERTIES: Extract variables safely from your dynamic multi-tenant dict
-            raw_bank_desc_clean = raw_reference if raw_reference else "EFT TRANSFER / MASKED_METADATA_UNPARSABLE"
-
-            # ACTIVATE FILTER: Clean the bank feed metadata inside transient memory before disk write
-            cleaned_bank_string = anonymise_raw_bank_metadata(raw_bank_desc_clean)
+            candidates = cursor.fetchall()
+            if not candidates:
+                return {"match_status": "IGNORED", "reason": "No active open invoices match this transaction amount balance value"}    
         
-            update_sql = """
-                UPDATE customer_payments 
-                SET status = 'COMPLETED', 
-                    bank_transaction_id = %s, 
-                    clearing_rail_used = %s, 
-                    actual_reference_received = %s, -- Safely writes masked metadata only
-                    tracking_hash = %s,
-                    matched_at = %s, 
-                    updated_at = %s
-                WHERE id = %s;
-            """
-            cursor.execute(update_sql, (
-                payload.get("bank_transaction_id"),
-                payload.get("clearing_rail"),
-                cleaned_bank_string,            # Injects the POPIA-compliant string value
-                secure_invoice_hash,            # 💎 PASSED AS SECURE 12-CHARACTER FOOTPRINT
-                datetime.now(timezone.utc),
-                datetime.now(timezone.utc),
-                target["id"]
-            ))
-            cursor.execute(
+            matched_records = []
+            if raw_reference:
+                raw_desc_upper = raw_reference.upper()
+            else:
+                raw_desc_upper = ""
+                print(f"raw_reference: {raw_desc_upper}.")
+                print("⚠️ [MATCH ENGINE]: Warning - Inbound raw reference text row is completely empty.")
+
+            
+            for rec in candidates:
+                # 1. Clean and evaluate your open ledger reference keys from Supabase/ERP
+                expected_ref_raw = str(rec.get(indx_ref_string, ""))
+                expected_ref_upper = expected_ref_raw.upper()
+
+                # 2. Extract pure numeric digits out of the expected reference key (e.g., 'INV_90842' -> '90842')
+                # This handles instances where citizens leave off string tags completely
+                numeric_digits_only = "".join(filter(str.isdigit, expected_ref_upper))
+
+                # 3. Formulate an adaptive 8-character truncation window token for loose matching filters
+                truncated_ref_upper = expected_ref_upper[:8]
+
+                # 🎯 THE ULTIMATE THREE-TIER INCLUSION GATE:
+                # Checks for absolute string inclusion, truncated parameters, or pure billing digit matches
+                if (expected_ref_upper in raw_desc_upper) or \
+                (truncated_ref_upper in raw_desc_upper and len(truncated_ref_upper) > 3) or \
+                (numeric_digits_only in raw_desc_upper and len(numeric_digits_only) > 3):
+                    
+                    print(f"🎯 [MATCHED]: Flawless ledger allocation loop match found for: '{expected_ref_upper}'")
+                    matched_records.append(rec)
+
+            # 🚀 EXTRA COLLISION PROTOCOL LAYER: Best Fit Length Priority Check
+            if len(matched_records) > 1:
+                print(f"⚠️ [COLLISION PROTOCOL] Multi-match candidates detected ({len(matched_records)}). Evaluating Best Fit priority layer...")
+                
+                # Group records by whether their exact reference appears in the description
+                # and sort them by the length of the expected reference in descending order
+                exact_substring_matches = []
+                for rec in matched_records:
+                    if rec[indx_ref_string].upper() in raw_desc_upper:
+                        exact_substring_matches.append(rec)
+                
+                if exact_substring_matches:
+                    # Sort descending by string character size length
+                    exact_substring_matches.sort(key=lambda x: len(x["expected_reference"]), reverse=True)
+                    
+                    longest_match_len = len(exact_substring_matches[0]["expected_reference"])
+                    # Filter down to only those items sharing the maximum length alignment value
+                    top_tier_fits = [r for r in exact_substring_matches if len(r["expected_reference"]) == longest_match_len]
+                    
+                    # If a single candidate fits better than the shorter substrings, override and resolve the collision!
+                    if len(top_tier_fits) == 1:
+                        print(f"🎯 [COLLISION PROTOCOL] Resolution secured! '{top_tier_fits[0]['invoice_id']}' selected via Longest String Match rule.")
+                        matched_records = top_tier_fits
+
+            if len(matched_records) > 1:
+                collision_ids = [rec["id"] for rec in matched_records]
+                print(f"🚨 [COLLISION ALERT]: Multiple invoice matches located for this transaction amount balance! Flagging IDs: {collision_ids}")
+                
+                
+                # 💎 THE ABSOLUTE SYNTACICAL FIXED WRAPPER: Separating the SQL string from variables tuple with a clean comma!
+                cursor.execute(
+                    """
+                    UPDATE customer_payments 
+                    SET status = 'AWAITING_VERIFICATION', updated_at = %s 
+                    WHERE id IN %s;
+                    """,
+                    (datetime.now(timezone.utc), tuple(collision_ids)) # ◄── Clean independent data tuple parameter!
+                )
+                conn.commit()
+                return {"match_status": "EXCEPTION_LOGGED", "reason": "Data collision detected. Isolated for manual review dashboard."}
+
+            if len(matched_records) == 1:
+                target = matched_records[0]
+
+                # 🛡️ FIX DATA ACCESS PROPERTIES: Extract variables safely from your dynamic multi-tenant dict
+                raw_bank_desc_clean = raw_reference if raw_reference else "EFT TRANSFER / MASKED_METADATA_UNPARSABLE"
+
+                # ACTIVATE FILTER: Clean the bank feed metadata inside transient memory before disk write
+                cleaned_bank_string = anonymise_raw_bank_metadata(raw_bank_desc_clean)
+            
+                update_sql = """
+                    UPDATE customer_payments 
+                    SET status = 'COMPLETED', 
+                        bank_transaction_id = %s, 
+                        clearing_rail_used = %s, 
+                        actual_reference_received = %s, -- Safely writes masked metadata only
+                        tracking_hash = %s,
+                        matched_at = %s, 
+                        updated_at = %s
+                    WHERE id = %s;
                 """
-                INSERT INTO bank_reconciliation_feed_logs (filename, tracking_hash, status_state, created_at)
-                VALUES (%s, %s, %s, NOW())
-                ON CONFLICT DO NOTHING;
-                """,
-                (unique_tx_id, secure_invoice_hash, "WEBHOOK_RECONCILED")
-            )
-            conn.commit()
+                cursor.execute(update_sql, (
+                    payload.get("bank_transaction_id"),
+                    payload.get("clearing_rail"),
+                    cleaned_bank_string,            # Injects the POPIA-compliant string value
+                    secure_invoice_hash,            # 💎 PASSED AS SECURE 12-CHARACTER FOOTPRINT
+                    datetime.now(timezone.utc),
+                    datetime.now(timezone.utc),
+                    target["id"]
+                ))
+                cursor.execute(
+                    """
+                    INSERT INTO bank_reconciliation_feed_logs (filename, tracking_hash, status_state, created_at)
+                    VALUES (%s, %s, %s, NOW())
+                    ON CONFLICT DO NOTHING;
+                    """,
+                    (unique_tx_id, secure_invoice_hash, "WEBHOOK_RECONCILED")
+                )
+                conn.commit()
+                
+                # 🚀 ASYNC TRIGGER: Offload the retry logic to background threads immediately
+                merchant_callback_url = "https://merchant-crm-domain-placeholder.co.za"
+                webhook_payload = {
+                    "event": "payment.completed",
+                    "invoice_id": target["invoice_id"],
+                    "reconciled_at": datetime.now(timezone.utc).isoformat(),
+                    "popia_audit_token": secure_invoice_hash # Pass anonymized tracking code to client callbacks
+                }
             
-            # 🚀 ASYNC TRIGGER: Offload the retry logic to background threads immediately
-            merchant_callback_url = "https://merchant-crm-domain-placeholder.co.za"
-            webhook_payload = {
-                "event": "payment.completed",
-                "invoice_id": target["invoice_id"],
-                "reconciled_at": datetime.now(timezone.utc).isoformat(),
-                "popia_audit_token": secure_invoice_hash # Pass anonymized tracking code to client callbacks
-            }
-        
-            # Hand off task execution instantly to free up your server to process the next incoming payment
-            background_tasks.add_task(dispatch_webhook_with_backoff, merchant_callback_url, webhook_payload)
+                # Hand off task execution instantly to free up your server to process the next incoming payment
+                background_tasks.add_task(dispatch_webhook_with_backoff, merchant_callback_url, webhook_payload)
 
-            # 🚀 VISUAL PITCH DEMO AID: Print logs forcefully onto your terminal console display
-            print(f"\n🔒 [POPIA SECURITY] Intercepting bank feed payload... Scrubbing depositor name in memory.")
-            print(f"   Original Description: {raw_bank_desc_clean}")
-            print(f"   Committed Database String: EFT INTERBANK /FRM: MASKED_{secure_invoice_hash} /REF: {target['invoice_id']}")
-            
-            return {"match_status": "SUCCESS", "reconciled_invoice": target["invoice_id"], "new_state": "COMPLETED"}
-            
-            # ... Your existing database update execution lines ...
-            conn.commit()
-            
-            print(f"⚡ [ASYNC TASK] Database tracking rows locked to COMPLETED. Handing off outbound event worker hook.")
+                # 🚀 VISUAL PITCH DEMO AID: Print logs forcefully onto your terminal console display
+                print(f"\n🔒 [POPIA SECURITY] Intercepting bank feed payload... Scrubbing depositor name in memory.")
+                print(f"   Original Description: {raw_bank_desc_clean}")
+                print(f"   Committed Database String: EFT INTERBANK /FRM: MASKED_{secure_invoice_hash} /REF: {target['invoice_id']}")
+                
+                return {"match_status": "SUCCESS", "reconciled_invoice": target["invoice_id"], "new_state": "COMPLETED"}
+                
+                # ... Your existing database update execution lines ...
+                conn.commit()
+                
+                print(f"⚡ [ASYNC TASK] Database tracking rows locked to COMPLETED. Handing off outbound event worker hook.")
 
-        return {"match_status": "IGNORED", "reason": "Amount matches open records, but text reference signatures do not align"}
+            return {"match_status": "IGNORED", "reason": "Amount matches open records, but text reference signatures do not align"}
     except HTTPException:
         conn.rollback()
         raise
