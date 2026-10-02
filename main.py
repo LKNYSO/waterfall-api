@@ -350,7 +350,10 @@ async def secure_infrastructure_proxy_firewall(request: Request, call_next):
     if path == "/" or "/pitch" in path or "/api/v1/pitch" in path or "/api/v1/bank-feeds/mt940-upload" in path or "/api/v1/webhooks/bank-feed" in path:
         print(f"🛡️ [FIREWALL BYPASS]: Granting clean route entry to public pitch lane: {path}")
         return await call_next(request)
-    
+    # If all routing blocks pass, let traffic execute core script logic
+    return await call_next(request)
+
+@app.middleware("http")    
 async def secure_routing_gateway_pipeline(request: Request, call_next):
     """
     Consolidated Week 2 Security Stack. Cascades requests through:
