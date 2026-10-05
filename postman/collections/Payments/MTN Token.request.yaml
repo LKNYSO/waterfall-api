@@ -1,0 +1,21 @@
+$kind: http-request
+description: ""
+url: https://sandbox.momodeveloper.mtn.com/v1_0/apiuser
+method: POST
+headers:
+  Content-Type: application/json
+  Ocp-Apim-Subscription-Key: 8d3e968568484b8495f498264066f89e
+  X-Reference-Id: e2745aaa-438e-49b7-b931-87c302990fb9
+body:
+  type: json
+  content: "{\r
+
+    \  \"providerCallbackHost\": \"webhook.site\"\r
+
+    }\r\n"
+auth:
+  type: basic
+  credentials:
+    username: b9SVQQlgtGFINar3DVxmbuT2N1HGJwtF
+    password: 8dIMCzeWGSFLEiDV
+order: 4503519139245058

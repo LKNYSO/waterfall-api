@@ -48,6 +48,9 @@ REFILL_RATE_PER_SECOND = 200 / 60.0  # Refills roughly 3.33 tokens per second
 # In-memory bucket state registry: { "client_id": {"tokens": float, "last_updated": float} }
 RATE_LIMIT_BUCKETS = {}
 
+# Create function that looks at current local machine IP address and
+# adds it to TRUSTED_BANK_FEED_IPS
+
 TRUSTED_BANK_FEED_IPS = [
     "127.0.0.1",       # Permits your local Postman testing queries
     "102.132.0.1",     # Example simulated trusted bank feed proxy IP
@@ -119,7 +122,7 @@ async def serve_pitch_evening_chat_client():
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="User interface template 'rag_chat.html' missing.")
 
-@app.post("/api/v1/pitch/rag", response_model=AIResponseModel, tags=["Pitch Evaluation System"])
+@app.post("/api/v1/pitch/rag", response_model=AIResponseModel, tags=["Pitch Evaluation System"]) # why is tags=["Pitch Evaluation"] applied here as well; shouldn't it be different from @app.get pitch("/pitch/ask")?
 async def pitch_evening_rag_gateway(payload: JudgeQueryRequest):
     """Live Jury RAG Gateway: Runs cloud-powered vector search and Gemini synthesis."""
     try:
@@ -328,13 +331,7 @@ class BankFeedWebhook(BaseModel):
     clearing_rail: str = Field(..., example="INSTANT_PAYMENT")
 
 
-# 1. Configure the Token Bucket Parameters
-# Enforces a strict limit of 200 requests per minute per authenticated client app
-MAX_TOKENS = 200
-REFILL_RATE_PER_SECOND = 200 / 60.0  # Refills roughly 3.33 tokens per second
-
-# In-memory bucket state registry: { "client_id": {"tokens": float, "last_updated": float} }
-RATE_LIMIT_BUCKETS = {}
+# Configuring of the Token Bucket Parameters
 
 
 
