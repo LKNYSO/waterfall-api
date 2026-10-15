@@ -27,22 +27,28 @@ except ImportError:  # pragma: no cover - dependency is installed through requir
     ParagraphStyle = None
     colors = None
 
-# =======================================================================
-# 📡 INFRASTRUCTURE CREDENTIALS & CONSTANTS
-# =======================================================================
-DATABASE_HOST = "aws-0-eu-central-1.pooler.supabase.com"
-DATABASE_PORT = "5432"
-DATABASE_NAME = "postgres"
-DATABASE_USER = "postgres.faonspoqastaempflpee"
-DATABASE_PASSWORD = "mp3EjNdA9A3qFv0e"
+# ==============================================================================
+# 🔒 ENVIRONMENT VARIABLE LAYER (POPIA & RISK MANAGEMENT COMPLIANT)
+# ==============================================================================
+# Decouples plaintext infrastructure credentials entirely from public Git history.
+# Pulls variables natively from transient cloud RAM environment buffers.
+# ==============================================================================
 
-# Transactional Mail Relay Carrier Parameters (SendGrid Example Relay)
-SMTP_HOST = "smtp.sendgrid.net"
-SMTP_PORT = "465"  # Enforces native SSL right out of the box
-SMTP_USER = "apikey" # SendGrid requires the literal username 'apikey'
-SMTP_PASSWORD = "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"
-RECIPIENT_EMAIL = "blukhanyiso@gmail.com"
-SENDER_EMAIL = "blukhanyiso@gmail.com"
+DATABASE_HOST = os.getenv("DATABASE_HOST", "aws-0-eu-central-1.pooler.supabase.com")
+DATABASE_PORT = os.getenv("DATABASE_PORT", "5432")
+DATABASE_NAME = os.getenv("DATABASE_NAME", "postgres")
+DATABASE_USER = os.getenv("DATABASE_USER", "postgres.faonspoqastaempflpee")
+# 🚨 LEAVE NO DEFAULT STRING RAW HERE: Forces system memory ingestion at runtime!
+DATABASE_PASSWORD = os.getenv("DATABASE_PASSWORD") 
+
+# Transactional Mail Relay Carrier Parameters (SendGrid Production Variable Lane)
+SMTP_HOST = os.getenv("SMTP_HOST", "smtp.sendgrid.net")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "465"))
+SMTP_USER = os.getenv("SMTP_USER", "apikey")
+# 🚨 SECURE ENV EXTRACTION: Pulls your fresh, regenerated SG secret token cleanly
+SMTP_PASSWORD = os.getenv("SENDGRID_API_KEY") 
+RECIPIENT_EMAIL = os.getenv("RECIPIENT_EMAIL", "blukhanyiso@gmail.com")
+SENDER_EMAIL = os.getenv("SENDER_EMAIL", "blukhanyiso@gmail.com")
 
 def compile_daily_financial_ledger_pdf() -> str:
     """Queries Supabase, unpacks positional database tuples, and builds the statement PDF."""
@@ -58,11 +64,11 @@ def compile_daily_financial_ledger_pdf() -> str:
     # 🚀 THE FIX: Separate your credentials explicitly into separate arguments 
     # to stop special characters like '@' or '%' from breaking the network connection string!
     conn = psycopg2.connect(
-        host="aws-0-eu-central-1.pooler.supabase.com",
-        port="5432",
-        database="postgres",
-        user="postgres.faonspoqastaempflpee",
-        password="mp3EjNdA9A3qFv0e"
+        host=DATABASE_HOST,
+        port=DATABASE_PORT,
+        database=DATABASE_NAME,
+        user=DATABASE_USER,
+        password=DATABASE_PASSWORD
     )
     cursor = conn.cursor()
     
