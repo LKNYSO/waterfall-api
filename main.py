@@ -68,8 +68,18 @@ DB_PASSWORD = os.getenv("DATABASE_PASSWORD")
 DB_URI_PROD = "postgresql://postgres.faonspoqastaempflpee:{DB_PASSWORD}@aws-0-eu-central-1.pooler.supabase.com:5432/postgres"
 
 def get_db_connection():
-    # Pass your live production cloud URI straight into the psycopg2 driver connection handler [B]
-    return psycopg2.connect(DB_URI_PROD)
+    # Pass your live production cloud URI straight into the psycopg2 driver connection handler 
+    db_password = os.getenv("DATABASE_PASSWORD")
+    if not db_password:
+        raise ValueError("CRITICAL: DATABASE_PASSWORD environment variable is not set!")
+    return psycopg2.connect(
+        host="aws-0-eu-central-1.pooler.supabase.com",
+        port=6543,
+        dbname="postgres",
+        user="postgres.faonspoqastaempflpee",
+        password=db_password,
+        sslmode="require"
+    )
 
 
 # Initialize FastAPI's built-in Bearer Extraction security tool
