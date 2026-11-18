@@ -1,0 +1,20 @@
+$kind: http-request
+description: ""
+url: "{{base_url}}/api/v1/webhooks/bank-feed"
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \  \"invoice_id\": \"CLOUD-COLLIDE-ALPHA_X1\",\r
+
+    \  \"customer_id\": \"d3b07384-d113-4a11-a531-112233445566\",\r
+
+    \  \"amount\": 75.00,\r
+
+    \  \"currency\": \"ZAR\",\r
+
+    \  \"expected_reference\": \"BCM_TRIAL_X1\"\r
+
+    } "
+order: 4503519139246058
