@@ -23,10 +23,12 @@ from fastapi import FastAPI, HTTPException, Header, status, Depends, Request, Re
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field, UUID4
 import google.generativeai as genai
+from xero_connector import router as xero_router
+
 
 # Initialize FastAPI Web Server
 app = FastAPI(title="Waterfall API", version="1.0.0")
-
+app.include_router(xero_router)
 # 🔒 Cryptographic Token Secret & Algorithm Configurations
 # In production, pull these from secure environment variables/AWS Secrets Manager
 JWT_SECRET_KEY = "waterfall_super_secret_encryption_key_dont_leak"
