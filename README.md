@@ -1,9 +1,50 @@
-🌊 Waterfall APIHigh-Throughput Transaction Reconciliation Middleware & POPIA-Hardened Governance GatewayEngineered out of the Eastern Cape, South Africa. 
+🌊 Waterfall API
+High-Throughput Transaction Reconciliation Middleware & POPIA-Hardened Governance Gateway. Engineered out of the Eastern Cape, South Africa. 
 
-🏛️ Executive AbstractWaterfall API is a developer-first, zero-trust infrastructure middleware utility optimized specifically to liberate corporate accounting 
-desks and public sector municipal finance departments from manual ledger entry overhead. Operating under a strict 50MB RAM ceiling, Waterfall API sits upstream 
-of core enterprise ledgers (such as SAP S/4HANA or Xero), dynamically capturing real-time payment notifications and daily banking files. 
-It parses, triages, and matches messy transaction references inin-memory string parsing and text-matching computation loops execute in 
+## Technical Architecture & Core Engineering Capabilities
+
+Waterfall API is a stateless, production-deployed financial reconciliation engine built to bridge legacy enterprise ledgers with modern telecom and open-banking payment rails.
+
+### 1. Python Backend & Asynchronous Concurrency (`main.py`)
+* **High-Throughput Non-Blocking I/O:** Engineered with **FastAPI** and **Uvicorn** (`async def` + `BackgroundTasks`) to ingest concurrent webhook payloads in `< 15ms` without blocking the main event loop.
+* **Sub-300ms Volatile RAM Parsing:** Extracts and normalizes unstructured payment reference strings entirely inside transient memory buffers under a strict **50MB RAM runtime ceiling**.
+* **Idempotency & Fault Tolerance:** Enforces unique transaction identifier guardrails (`HTTP 409 Conflict` on duplicate keys) and custom latency telemetry headers (`X-Waterfall-Ingestion-Latency-MS`).
+
+### 2. Applied AI & RAG Data Ingestion (`ingest_rag_data.py`)
+* **Retrieval-Augmented Generation (RAG) Pipeline:** Implements modular document chunking and vector-ready data ingestion workflows (`ingest_rag_data.py`) to support semantic anomaly triage and automated ledger diagnostics.
+* **AI-Assisted Compute Optimization:** Architected around lightweight microservice boundaries designed to scale into predictive workload balancing without bloated dependency overhead.
+
+### 3. Telecom & Open-Banking API Integrations (`xero_connector.py`)
+* **Telecom Mobile Money Rails:** Built to ingest and reconcile unstructured mobile wallet notifications (MTN MoMo) alongside interbank SWIFT/EFT clearing feeds via universal catchment webhooks (`/api/v1/webhooks/bank-feed`).
+* **OAuth 2.0 Accounting Bridge:** Implements self-serve OAuth 2.0 authorization, rotating refresh-token persistence, and automated invoice allocation against **Xero's Accounting API** (`feat/xero-integration`).
+
+### 4. Database Engineering & Connection Pooling (PostgreSQL / Supabase)
+* **Transaction Pooler Optimization:** Connects to cloud-hosted PostgreSQL via Supabase's Supavisor transaction pooler (`Port 6543`, `sslmode="require"`) using deterministic context managers to prevent socket exhaustion and connection leaks.
+* **Zero-Leak Credential Management:** Decouples all database, OAuth, and cloud keys from source code via strict runtime environment variable injection (`os.getenv`).
+
+### 5. Containerization & Zero-Egress Security (`Dockerfile` & `docker-compose.infra.yml`)
+* **Non-Root Hardened Runtime (`Dockerfile`):** Built on `python:3.11-slim-buster` running under an unprivileged `waterfall_runtime_worker` user (`PYTHONDONTWRITEBYTECODE=1`) to block on-disk bytecode persistence and privilege escalation.
+* **Zero-Egress Network Isolation (`docker-compose.infra.yml`):** Configured with an internal-only Docker bridge (`internal: true`) that blocks unauthorized outbound internet traffic, ensuring strict data sovereignty.
+* **POPIA Cryptographic Data Minimization:** Sanitizes personally identifiable information (PII) in volatile memory into irreversible, truncated **12-character SHA-256 footprints** prior to audit log persistence.
+
+---
+
+### Quick Start & Local Container Execution
+
+```bash
+# Run locally with Uvicorn
+uvicorn main:app --reload --port 8000
+
+# Or deploy inside an isolated zero-egress Docker container
+docker compose -f docker-compose.infra.yml up --build
+```
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+🏛️ Executive Abstract
+Waterfall API is a developer-first, zero-trust infrastructure middleware utility optimized specifically to liberate corporate accounting 
+desks and public sector municipal finance departments from manual ledger entry overhead. Operating under a strict 50MB RAM ceiling, Waterfall API sits upstream of core enterprise ledgers (such as SAP S/4HANA or Xero), dynamically capturing real-time payment notifications and daily banking files. 
+It parses, triages, and matches messy transaction references in in-memory string parsing and text-matching computation loops execute in 
 under 5 milliseconds per entry once the payload strikes our server entirely inside transient memory, converting high-friction data streams into standardized, 
 anonymized financial audit trails. Waterfall API positions itself as the definitive agile alternative to heavy, slow, and expensive legacy systems integrators 
 like Business Connexion Group (BCX), transforming an institutional cost burden into a high-efficiency utility model. 
