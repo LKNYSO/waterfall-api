@@ -23,8 +23,11 @@ from fastapi import FastAPI, HTTPException, Header, status, Depends, Request, Re
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field, UUID4
 import google.generativeai as genai
+from dotenv import load_dotenv
 from xero_connector import router as xero_router
 
+# Load environment variables
+load_dotenv()
 
 # Initialize FastAPI Web Server
 app = FastAPI(title="Waterfall API", version="1.0.0")
