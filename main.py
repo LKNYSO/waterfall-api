@@ -24,10 +24,9 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field, UUID4
 import google.generativeai as genai
 from dotenv import load_dotenv
-from xero_connector import router as xero_router
-
 # Load environment variables
 load_dotenv()
+from xero_connector import router as xero_router
 
 # Initialize FastAPI Web Server
 app = FastAPI(title="Waterfall API", version="1.0.0")
@@ -73,6 +72,20 @@ DB_PASSWORD = os.getenv("DATABASE_PASSWORD")
 DB_URI_PROD = "postgresql://postgres.faonspoqastaempflpee:{DB_PASSWORD}@aws-0-eu-central-1.pooler.supabase.com:5432/postgres"
 
 def get_db_connection():
+    # Pass your live production cloud URI straight into the psycopg2 driver connection handler 
+    db_password = os.getenv("DATABASE_PASSWORD")
+    if not db_password:
+        raise ValueError("CRITICAL: DATABASE_PASSWORD environment variable is not set!")
+    return psycopg2.connect(
+        host="aws-0-eu-central-1.pooler.supabase.com",
+        port=6543,
+        dbname="postgres",
+        user="postgres.faonspoqastaempflpee",
+        password=db_password,
+        sslmode="require"
+    )
+
+def get_xero_db_connection():
     # Pass your live production cloud URI straight into the psycopg2 driver connection handler 
     db_password = os.getenv("DATABASE_PASSWORD")
     if not db_password:
